@@ -7,6 +7,13 @@
 	"dockerFile": "../Dockerfile",
 	"remoteEnv": {
 		"PATH": "${containerEnv:PATH}:/usr/class/cs143/cool/bin"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"maoguangming.cool"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
