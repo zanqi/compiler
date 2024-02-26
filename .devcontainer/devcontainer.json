@@ -6,14 +6,20 @@
 	"context": "..",
 	"dockerFile": "../Dockerfile",
 	"remoteEnv": {
-		"PATH": "${containerEnv:PATH}:/usr/class/cs143/cool/bin"
+		// "PATH": "${containerEnv:PATH}:/usr/class/cs143/cool/bin"
+		"PATH": "${containerEnv:PATH}:/workspaces/compiler/bin"
 	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"maoguangming.cool"
+				"maoguangming.cool",
+				"ms-azuretools.vscode-docker",
+				"ms-vscode.makefile-tools"
 			]
 		}
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

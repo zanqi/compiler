@@ -1,0 +1,37 @@
+import java.io.*;
+
+class IdLexerMain {
+    public static void main(String args[]) throws IOException {
+        IdLexer lex = new IdLexer(System.in);
+        Token token = lex.yylex();
+
+        while ( token.text != null ) {
+            token = lex.yylex(); //get next token
+        }
+    }
+}
+
+class Token {
+    String text;
+    Token(String t) { text = t; }
+}
+%%
+
+%public
+%class IdLexer
+%type void
+
+digit = [0-9]
+letter = [a-zA-Z]
+whitespace = [ \t\n]
+
+%type Token
+%eofval{
+return new Token(null);
+%eofval}
+%%
+
+{letter}({letter}|{digit})* { System.out.print("<ID," + yytext() + "> "); }
+{digit}+ { System.out.print("<NUM," + yytext() + "> "); }
+{digit}?"."{digit}+ { System.out.print("<NUM," + yytext() + "> "); }
+{whitespace}+ { /* skip white spaces */ }

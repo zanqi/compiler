@@ -1,0 +1,39 @@
+import java.io.*;
+
+class Main {
+    public static void main(String args[]) throws IOException {
+        IdKwdLexer lex = new IdKwdLexer(System.in);
+        Token token = lex.yylex();
+
+        while ( token.text != null ) {
+            token = lex.yylex(); //get next token
+        }
+    }
+}
+
+class Token {
+    String text;
+    Token(String t) { text = t; }
+}
+%%
+
+%public
+%class IdKwdLexer
+%type void
+
+digit = [0-9]
+letter = [a-zA-Z]
+whitespace = [ \t\n]
+
+%type Token
+%eofval{
+return new Token(null);
+%eofval}
+%%
+
+"if" { System.out.print("<IF," + yytext() + "> "); }
+"for" { System.out.print("<FOR," + yytext() + "> "); }
+"class" { System.out.print("<CLASS," + yytext() + "> "); }
+"{" { System.out.print("<{," + yytext() + "> "); }
+{letter}({letter}|{digit})* { System.out.print("<ID," + yytext() + "> "); }
+{whitespace}+ { /* skip white spaces */ }

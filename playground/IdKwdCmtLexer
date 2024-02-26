@@ -1,0 +1,44 @@
+import java.io.*;
+
+class Main {
+    public static void main(String args[]) throws IOException {
+        IdKwdCmtLexer lex = new IdKwdCmtLexer(System.in);
+        Token token = lex.yylex();
+        while ( token.text != null ) {
+            token = lex.yylex(); //get next token
+        }
+    }
+}
+
+class Token {
+    String text;
+    Token(String t) { text = t; }
+}
+%%
+
+%public
+%class IdKwdCmtLexer
+%type void
+%line
+
+digit = [0-9]
+letter = [a-zA-Z]
+space = [ ]
+tab = [\t]
+newline = [\n]
+whitespace = [ \t\n]
+
+%type Token
+%eofval{
+return new Token(null);
+%eofval}
+%%
+
+"//"({letter}|{digit}|{space})*{newline} { /* skip comments */ }
+"/*"({letter}|{digit}|{space}|{newline})*"*/" { /* skip comments */ }
+"\""({letter}|{digit}|{space})*"\"" { System.out.print("<STRING," + yytext().substring(1, yytext().length()-1) + "> "); }
+"if" { System.out.print("<IF," + yytext() + "> "); }
+"line" { System.out.print("<LINE," + yyline + "> "); }
+{letter}({letter}|{digit})* { System.out.print("<ID," + yytext() + "> "); }
+{whitespace}+ { /* skip white spaces */ }
+.|\n { throw new Error("Illegal character <" + yytext()+">"); }

@@ -9,9 +9,9 @@ RUN apt-get update
 RUN apt-get install -y flex bison build-essential csh
 RUN apt-get install -y libxaw7-dev git vim libc6:i386
 
-WORKDIR /usr/class/cs143/cool
-COPY --chown=root:root . .
+# WORKDIR /usr/class/cs143/cool
+# COPY --chown=root:root . .
 
-WORKDIR /root/cs143
+# WORKDIR /root/cs143
 
 ENTRYPOINT ["/bin/bash"]

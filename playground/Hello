@@ -1,0 +1,34 @@
+import java.io.*;
+
+class HelloMain {
+    public static void main(String args[]) throws IOException {
+        Hello lex = new Hello(System.in);
+        Token token = lex.yylex();
+
+        while ( token.text != null ) {
+            System.out.println(token.text);
+            token = lex.yylex(); //get next token
+        }
+    }
+}
+
+class Token {
+    String text;
+    Token(String t) { text = t; }
+}
+%%
+
+%public
+%class Hello
+%type void
+
+whitespace = [ \t\n]
+
+%type Token
+%eofval{
+return new Token(null);
+%eofval}
+%%
+
+"hello world" { System.out.println("GOODBYE"); return new Token("GOODBYE"); }
+{whitespace}+ {}
