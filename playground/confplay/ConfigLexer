@@ -1,0 +1,32 @@
+package confplay;
+
+class Yytoken { 
+    int field; 
+    String text;
+    Yytoken(int f, String t) { 
+        field=f; 
+        text=t;
+    } 
+
+    Yytoken(int f) { 
+        field=f; 
+        text="";
+    } 
+}
+
+%%
+
+%public
+%class ConfigLexer
+
+%%
+:                       { return new Yytoken(TokenConstants.COLON); }
+"db_type"               { return new Yytoken(TokenConstants.TYPE); }
+"db_name"               { return new Yytoken(TokenConstants.NAME); }
+"db_table_prefix"       { return new Yytoken(TokenConstants.TABLE_PREFIX); }
+"db_port"               { return new Yytoken(TokenConstants.PORT); }
+
+[a-zA-Z_][a-zA-Z0-9_]*  { return new Yytoken(TokenConstants.IDENTIFIER, yytext()); }
+[1-9][0-9]*             { return new Yytoken(TokenConstants.INTEGER, yytext()); }
+[ \t\n\r]+              {}
+.                       { System.out.println("Unrecognized character: "+yytext()); }
