@@ -62,14 +62,79 @@ import java_cup.runtime.Symbol;
 	   ...
 	   break;
 	*/
+    case COMMENT:
+        return new Symbol(TokenConstants.ERROR, "EOF in comment");
+    case STRING:
+        return new Symbol(TokenConstants.ERROR, "EOF in string: " + string_buf.toString());
     }
     return new Symbol(TokenConstants.EOF);
 %eofval}
 
 %class CoolLexer
 %cup
+%state COMMENT
+%state STRING
+
+digit = [0-9]
+letter = [a-zA-Z]
+lowercase = [a-z]
+capital = [A-Z]
+space = [ ]
+underscore = [_]
+newline = [\n]
+whitespace = [ \t\n]
+backslash = [\\]
+quote = [\"]
 
 %%
+
+"class"         { return new Symbol(TokenConstants.CLASS); }
+"inherits"      { return new Symbol(TokenConstants.INHERITS); }
+"{"             { return new Symbol(TokenConstants.LBRACE); }
+"}"             { return new Symbol(TokenConstants.RBRACE); }
+"("             { return new Symbol(TokenConstants.LPAREN); }
+")"             { return new Symbol(TokenConstants.RPAREN); }
+":"             { return new Symbol(TokenConstants.COLON); }
+<YYINITIAL>";"  { return new Symbol(TokenConstants.SEMI); }
+<YYINITIAL>{lowercase}({letter}|{digit}|{underscore})* { 
+    AbstractSymbol sym = AbstractTable.idtable.addString(yytext());
+    return new Symbol(TokenConstants.OBJECTID, sym);
+}
+<YYINITIAL>{capital}({letter}|{digit}|{underscore})* { 
+    AbstractSymbol sym = AbstractTable.idtable.addString(yytext());
+    return new Symbol(TokenConstants.TYPEID, sym);
+}
+<YYINITIAL>{digit}+        { 
+    IntSymbol sym = (IntSymbol)AbstractTable.inttable.lookup(yytext());
+    if (sym == null) {
+        sym = (IntSymbol)AbstractTable.inttable.addString(yytext());
+    }
+    return new Symbol(TokenConstants.INT_CONST, sym);
+}
+
+<YYINITIAL>{whitespace}+   { /* eat whitespace */ }
+
+<YYINITIAL>{quote}            { yybegin(STRING); }
+<STRING>{backslash}\n  { string_buf.append("\n"); curr_lineno++; }
+<STRING>"\n"   { string_buf.append("\n"); }
+<STRING>"\t"   { string_buf.append("\t"); }
+<STRING>"\b"   { string_buf.append("\b"); }
+<STRING>"\f"   { string_buf.append("\f"); }
+<STRING>{backslash}[^ntbf]    { string_buf.append(yytext().charAt(1));  }
+<STRING>{quote}    { yybegin(YYINITIAL);
+                    AbstractSymbol sym = AbstractTable.stringtable.addString(string_buf.toString());
+                    return new Symbol(TokenConstants.STR_CONST, sym); }
+<STRING>.  { 
+    string_buf.append(yytext()); 
+}
+
+"(*"            { yybegin(COMMENT); }
+<COMMENT>[^\n]* { /* eat comments */ }
+<COMMENT>\n     { curr_lineno++; }
+<COMMENT>"*)"   { yybegin(YYINITIAL); }
+
+
+
 
 <YYINITIAL>"=>"			{ /* Sample lexical rule for "=>" arrow.
                                      Further lexical rules should be defined
