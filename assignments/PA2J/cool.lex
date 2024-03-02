@@ -89,24 +89,55 @@ newline = [\n]
 whitespace = [ \t\n]
 backslash = [\\]
 quote = [\"]
+a = [aA]
+b = [bB]
+c = [cC]
+d = [dD]
+e = [eE]
+f = [fF]
+g = [gG]
+h = [hH]
+i = [iI]
+j = [jJ]
+k = [kK]
+l = [lL]
+m = [mM]
+n = [nN]
+o = [oO]
+p = [pP]
+q = [qQ]
+r = [rR]
+s = [sS]
+t = [tT]
+u = [uU]
+v = [vV]
+w = [wW]
+x = [xX]
+y = [yY]
+z = [zZ]
 
 %%
 
-<YYINITIAL>"class"         { return new Symbol(TokenConstants.CLASS); }
-<YYINITIAL>"inherits"      { return new Symbol(TokenConstants.INHERITS); }
-<YYINITIAL>"if"            { return new Symbol(TokenConstants.IF); }
-<YYINITIAL>"fi"            { return new Symbol(TokenConstants.FI); }
-<YYINITIAL>"then"          { return new Symbol(TokenConstants.THEN); }
-<YYINITIAL>"else"          { return new Symbol(TokenConstants.ELSE); }
-<YYINITIAL>"new"           { return new Symbol(TokenConstants.NEW); }
-<YYINITIAL>"while"         { return new Symbol(TokenConstants.WHILE); }
-<YYINITIAL>"not"           { return new Symbol(TokenConstants.NOT); }
-<YYINITIAL>"loop"           { return new Symbol(TokenConstants.LOOP); }
-<YYINITIAL>"pool"           { return new Symbol(TokenConstants.POOL); }
-<YYINITIAL>"let"           { return new Symbol(TokenConstants.LET); }
-<YYINITIAL>"in"           { return new Symbol(TokenConstants.IN); }
-<YYINITIAL>"true"           { return new Symbol(TokenConstants.BOOL_CONST, Boolean.TRUE); }
-<YYINITIAL>"false"           { return new Symbol(TokenConstants.BOOL_CONST, Boolean.FALSE); }
+<YYINITIAL>{c}{l}{a}{s}{s}         { return new Symbol(TokenConstants.CLASS); }
+<YYINITIAL>{i}{n}{h}{e}{r}{i}{t}{s}      { return new Symbol(TokenConstants.INHERITS); }
+<YYINITIAL>{i}{f}            { return new Symbol(TokenConstants.IF); }
+<YYINITIAL>{f}{i}            { return new Symbol(TokenConstants.FI); }
+<YYINITIAL>{t}{h}{e}{n}          { return new Symbol(TokenConstants.THEN); }
+<YYINITIAL>{e}{l}{s}{e}          { return new Symbol(TokenConstants.ELSE); }
+<YYINITIAL>{n}{e}{w}          { return new Symbol(TokenConstants.NEW); }
+<YYINITIAL>{w}{h}{i}{l}{e}         { return new Symbol(TokenConstants.WHILE); }
+<YYINITIAL>{n}{o}{t}           { return new Symbol(TokenConstants.NOT); }
+<YYINITIAL>{l}{o}{o}{p}          { return new Symbol(TokenConstants.LOOP); }
+<YYINITIAL>{p}{o}{o}{l}          { return new Symbol(TokenConstants.POOL); }
+<YYINITIAL>{l}{e}{t}           { return new Symbol(TokenConstants.LET); }
+<YYINITIAL>{i}{n}            { return new Symbol(TokenConstants.IN); }
+<YYINITIAL>{i}{s}{v}{o}{i}{d}        { return new Symbol(TokenConstants.ISVOID); }
+<YYINITIAL>{c}{a}{s}{e}        { return new Symbol(TokenConstants.CASE); }
+<YYINITIAL>{e}{s}{a}{c}        { return new Symbol(TokenConstants.ESAC); }
+<YYINITIAL>{o}{f}        { return new Symbol(TokenConstants.OF); }
+<YYINITIAL>"@"        { return new Symbol(TokenConstants.AT); }
+<YYINITIAL>t{r}{u}{e}          { return new Symbol(TokenConstants.BOOL_CONST, Boolean.TRUE); }
+<YYINITIAL>f{a}{l}{s}{e}           { return new Symbol(TokenConstants.BOOL_CONST, Boolean.FALSE); }
 
 <YYINITIAL>"{"             { return new Symbol(TokenConstants.LBRACE); }
 <YYINITIAL>"}"             { return new Symbol(TokenConstants.RBRACE); }
