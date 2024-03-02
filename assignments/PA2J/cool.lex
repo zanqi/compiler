@@ -21,7 +21,7 @@ import java_cup.runtime.Symbol;
 
     private int curr_lineno = 1;
     int get_curr_lineno() {
-	return curr_lineno;
+	    return yyline + 1;
     }
 
     private AbstractSymbol filename;
@@ -63,9 +63,12 @@ import java_cup.runtime.Symbol;
 	   break;
 	*/
     case COMMENT:
-        return new Symbol(TokenConstants.ERROR, "EOF in comment");
+
+        System.err.println("#" + (yyline+1) + " LEXER BUG - EOF in comment: " + yytext());
+        return new Symbol(TokenConstants.EOF);
     case STRING:
-        return new Symbol(TokenConstants.ERROR, "EOF in string: " + string_buf.toString());
+        System.err.println("#" + (yyline+1) + " LEXER BUG - EOF in string: " + string_buf.toString());
+        return new Symbol(TokenConstants.EOF);
     }
     return new Symbol(TokenConstants.EOF);
 %eofval}
@@ -74,6 +77,7 @@ import java_cup.runtime.Symbol;
 %cup
 %state COMMENT
 %state STRING
+%line
 
 digit = [0-9]
 letter = [a-zA-Z]
@@ -88,14 +92,39 @@ quote = [\"]
 
 %%
 
-"class"         { return new Symbol(TokenConstants.CLASS); }
-"inherits"      { return new Symbol(TokenConstants.INHERITS); }
-"{"             { return new Symbol(TokenConstants.LBRACE); }
-"}"             { return new Symbol(TokenConstants.RBRACE); }
-"("             { return new Symbol(TokenConstants.LPAREN); }
-")"             { return new Symbol(TokenConstants.RPAREN); }
-":"             { return new Symbol(TokenConstants.COLON); }
-<YYINITIAL>";"  { return new Symbol(TokenConstants.SEMI); }
+<YYINITIAL>"class"         { return new Symbol(TokenConstants.CLASS); }
+<YYINITIAL>"inherits"      { return new Symbol(TokenConstants.INHERITS); }
+<YYINITIAL>"if"            { return new Symbol(TokenConstants.IF); }
+<YYINITIAL>"fi"            { return new Symbol(TokenConstants.FI); }
+<YYINITIAL>"then"          { return new Symbol(TokenConstants.THEN); }
+<YYINITIAL>"else"          { return new Symbol(TokenConstants.ELSE); }
+<YYINITIAL>"new"           { return new Symbol(TokenConstants.NEW); }
+<YYINITIAL>"while"         { return new Symbol(TokenConstants.WHILE); }
+<YYINITIAL>"not"           { return new Symbol(TokenConstants.NOT); }
+<YYINITIAL>"loop"           { return new Symbol(TokenConstants.LOOP); }
+<YYINITIAL>"pool"           { return new Symbol(TokenConstants.POOL); }
+<YYINITIAL>"let"           { return new Symbol(TokenConstants.LET); }
+<YYINITIAL>"in"           { return new Symbol(TokenConstants.IN); }
+<YYINITIAL>"true"           { return new Symbol(TokenConstants.BOOL_CONST, Boolean.TRUE); }
+<YYINITIAL>"false"           { return new Symbol(TokenConstants.BOOL_CONST, Boolean.FALSE); }
+
+<YYINITIAL>"{"             { return new Symbol(TokenConstants.LBRACE); }
+<YYINITIAL>"}"             { return new Symbol(TokenConstants.RBRACE); }
+<YYINITIAL>"("             { return new Symbol(TokenConstants.LPAREN); }
+<YYINITIAL>")"             { return new Symbol(TokenConstants.RPAREN); }
+<YYINITIAL>":"             { return new Symbol(TokenConstants.COLON); }
+<YYINITIAL>";"             { return new Symbol(TokenConstants.SEMI); }
+<YYINITIAL>"<-"            { return new Symbol(TokenConstants.ASSIGN); }
+<YYINITIAL>"."             { return new Symbol(TokenConstants.DOT); }
+<YYINITIAL>","             { return new Symbol(TokenConstants.COMMA); }
+<YYINITIAL>"+"             { return new Symbol(TokenConstants.PLUS); }
+<YYINITIAL>"-"             { return new Symbol(TokenConstants.MINUS); }
+<YYINITIAL>"="             { return new Symbol(TokenConstants.EQ); }
+<YYINITIAL>"<"             { return new Symbol(TokenConstants.LT); }
+<YYINITIAL>"<="            { return new Symbol(TokenConstants.LE); }
+<YYINITIAL>"~"             { return new Symbol(TokenConstants.NEG); }
+<YYINITIAL>"*"             { return new Symbol(TokenConstants.MULT); }
+<YYINITIAL>"/"             { return new Symbol(TokenConstants.DIV); }
 <YYINITIAL>{lowercase}({letter}|{digit}|{underscore})* { 
     AbstractSymbol sym = AbstractTable.idtable.addString(yytext());
     return new Symbol(TokenConstants.OBJECTID, sym);
@@ -105,33 +134,31 @@ quote = [\"]
     return new Symbol(TokenConstants.TYPEID, sym);
 }
 <YYINITIAL>{digit}+        { 
-    IntSymbol sym = (IntSymbol)AbstractTable.inttable.lookup(yytext());
-    if (sym == null) {
-        sym = (IntSymbol)AbstractTable.inttable.addString(yytext());
-    }
+    IntSymbol sym = (IntSymbol)AbstractTable.inttable.addString(yytext());
     return new Symbol(TokenConstants.INT_CONST, sym);
 }
 
 <YYINITIAL>{whitespace}+   { /* eat whitespace */ }
 
-<YYINITIAL>{quote}            { yybegin(STRING); }
-<STRING>{backslash}\n  { string_buf.append("\n"); curr_lineno++; }
-<STRING>"\n"   { string_buf.append("\n"); }
-<STRING>"\t"   { string_buf.append("\t"); }
-<STRING>"\b"   { string_buf.append("\b"); }
-<STRING>"\f"   { string_buf.append("\f"); }
-<STRING>{backslash}[^ntbf]    { string_buf.append(yytext().charAt(1));  }
-<STRING>{quote}    { yybegin(YYINITIAL);
-                    AbstractSymbol sym = AbstractTable.stringtable.addString(string_buf.toString());
-                    return new Symbol(TokenConstants.STR_CONST, sym); }
+<YYINITIAL>{quote}              { yybegin(STRING); string_buf.setLength(0); }
+<STRING>{backslash}\n           { string_buf.append("\n"); curr_lineno++; }
+<STRING>"\n"                    { string_buf.append("\n"); }
+<STRING>"\t"                    { string_buf.append("\t"); }
+<STRING>"\b"                    { string_buf.append("\b"); }
+<STRING>"\f"                    { string_buf.append("\f"); }
+<STRING>{backslash}[^ntbf]      { string_buf.append(yytext().charAt(1));  }
+<STRING>{quote}                 { yybegin(YYINITIAL);
+                                AbstractSymbol sym = AbstractTable.stringtable.addString(string_buf.toString());
+                                return new Symbol(TokenConstants.STR_CONST, sym); }
 <STRING>.  { 
     string_buf.append(yytext()); 
 }
 
-"(*"            { yybegin(COMMENT); }
-<COMMENT>[^\n]* { /* eat comments */ }
-<COMMENT>\n     { curr_lineno++; }
-<COMMENT>"*)"   { yybegin(YYINITIAL); }
+<YYINITIAL>"(*"                 { yybegin(COMMENT); }
+<COMMENT>.                      { /* eat comments */ }
+<COMMENT>\n                     { }
+<COMMENT>"*)"                   { yybegin(YYINITIAL); }
+<YYINITIAL>"--".*               { /* eat comments */ }
 
 
 
@@ -145,4 +172,4 @@ quote = [\"]
                                      in your lexical specification and
                                      will match match everything not
                                      matched by other lexical rules. */
-                                  System.err.println("LEXER BUG - UNMATCHED: " + yytext()); }
+                                  System.err.println("#" + (yyline+1) + " LEXER BUG - UNMATCHED: " + yytext()); }
