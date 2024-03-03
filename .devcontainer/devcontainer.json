@@ -7,7 +7,8 @@
 	"dockerFile": "../Dockerfile",
 	"remoteEnv": {
 		// "PATH": "${containerEnv:PATH}:/usr/class/cs143/cool/bin"
-		"PATH": "${containerEnv:PATH}:/workspaces/compiler/bin"
+		"PATH": "${containerEnv:PATH}:/workspaces/compiler/bin",
+		"LC_ALL": "C"
 	},
 	"customizations": {
 		"vscode": {

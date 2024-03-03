@@ -16,6 +16,8 @@ import java_cup.runtime.Symbol;
     // Max size of string constants
     static int MAX_STR_CONST = 1025;
 
+    boolean eof_flag = false;
+
     // For assembling string constants
     StringBuffer string_buf = new StringBuffer();
 
@@ -27,11 +29,11 @@ import java_cup.runtime.Symbol;
     private AbstractSymbol filename;
 
     void set_filename(String fname) {
-	filename = AbstractTable.stringtable.addString(fname);
+	    filename = AbstractTable.stringtable.addString(fname);
     }
 
     AbstractSymbol curr_filename() {
-	return filename;
+	    return filename;
     }
 %}
 
@@ -53,6 +55,11 @@ import java_cup.runtime.Symbol;
  *  Ultimately, you should return the EOF symbol, or your lexer won't
  *  work.  */
 
+    if (eof_flag) {
+        return new Symbol(TokenConstants.EOF);
+    }
+    eof_flag = true;
+
     switch(yy_lexical_state) {
     case YYINITIAL:
 	/* nothing special to do in the initial state */
@@ -62,13 +69,10 @@ import java_cup.runtime.Symbol;
 	   ...
 	   break;
 	*/
-    case COMMENT:
-
-        System.err.println("#" + (yyline+1) + " LEXER BUG - EOF in comment: " + yytext());
-        return new Symbol(TokenConstants.EOF);
     case STRING:
-        System.err.println("#" + (yyline+1) + " LEXER BUG - EOF in string: " + string_buf.toString());
-        return new Symbol(TokenConstants.EOF);
+        return new Symbol(TokenConstants.ERROR, "EOF in string constant");
+    case COMMENT:
+        return new Symbol(TokenConstants.ERROR, "EOF in comment");
     }
     return new Symbol(TokenConstants.EOF);
 %eofval}
@@ -156,6 +160,8 @@ z = [zZ]
 <YYINITIAL>"~"             { return new Symbol(TokenConstants.NEG); }
 <YYINITIAL>"*"             { return new Symbol(TokenConstants.MULT); }
 <YYINITIAL>"/"             { return new Symbol(TokenConstants.DIV); }
+
+<YYINITIAL>{underscore}    { return new Symbol(TokenConstants.ERROR, yytext()); }
 <YYINITIAL>{lowercase}({letter}|{digit}|{underscore})* { 
     AbstractSymbol sym = AbstractTable.idtable.addString(yytext());
     return new Symbol(TokenConstants.OBJECTID, sym);
@@ -172,7 +178,8 @@ z = [zZ]
 <YYINITIAL>{whitespace}+   { /* eat whitespace */ }
 
 <YYINITIAL>{quote}              { yybegin(STRING); string_buf.setLength(0); }
-<STRING>{backslash}\n           { string_buf.append("\n"); curr_lineno++; }
+<STRING>{backslash}\n           { string_buf.append("\n"); }
+<STRING>\n                      { yybegin(YYINITIAL); return new Symbol(TokenConstants.ERROR, "Unterminated string constant"); }
 <STRING>"\n"                    { string_buf.append("\n"); }
 <STRING>"\t"                    { string_buf.append("\t"); }
 <STRING>"\b"                    { string_buf.append("\b"); }
@@ -190,6 +197,7 @@ z = [zZ]
 <COMMENT>\n                     { }
 <COMMENT>"*)"                   { yybegin(YYINITIAL); }
 <YYINITIAL>"--".*               { /* eat comments */ }
+<YYINITIAL>"*)"                 { return new Symbol(TokenConstants.ERROR, "Unmatched *)");}
 
 
 
