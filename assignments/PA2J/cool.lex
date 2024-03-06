@@ -17,6 +17,7 @@ import java_cup.runtime.Symbol;
     static int MAX_STR_CONST = 1025;
 
     boolean eof_flag = false;
+    int comment_lvl = 0;
 
     // For assembling string constants
     StringBuffer string_buf = new StringBuffer();
@@ -193,9 +194,16 @@ z = [zZ]
 }
 
 <YYINITIAL>"(*"                 { yybegin(COMMENT); }
+<COMMENT>"(*"                   { comment_lvl++; }
 <COMMENT>.                      { /* eat comments */ }
 <COMMENT>\n                     { }
-<COMMENT>"*)"                   { yybegin(YYINITIAL); }
+<COMMENT>"*)"                   { 
+    if (comment_lvl == 0) {
+        yybegin(YYINITIAL);
+    } else {
+        comment_lvl--;
+    }
+}
 <YYINITIAL>"--".*               { /* eat comments */ }
 <YYINITIAL>"*)"                 { return new Symbol(TokenConstants.ERROR, "Unmatched *)");}
 

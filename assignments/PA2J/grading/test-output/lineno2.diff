@@ -1,8 +1,4 @@
-1c1,5
+1c1
 < #5 ERROR "!"
 ---
-> #3 OBJECTID fdjsk
-> #3 ';'
-> #3 OBJECTID ajs
-> #4 ERROR "Unmatched *)"
 > #5 LEXER BUG - UNMATCHED: !

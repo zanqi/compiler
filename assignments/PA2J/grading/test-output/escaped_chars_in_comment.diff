@@ -1,8 +1,0 @@
-0a1,7
-> '*'
-> LEXER BUG - UNMATCHED: \
-> ')'
-> OBJECTID abc
-> LEXER BUG - UNMATCHED: \
-> OBJECTID jkl
-> LONGERROR
