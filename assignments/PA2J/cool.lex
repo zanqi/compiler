@@ -180,6 +180,7 @@ z = [zZ]
 
 <YYINITIAL>{quote}              { yybegin(STRING); string_buf.setLength(0); }
 <STRING>{backslash}\n           { string_buf.append("\n"); }
+<STRING>\r                      { string_buf.append("\r"); }
 <STRING>\n                      { yybegin(YYINITIAL); return new Symbol(TokenConstants.ERROR, "Unterminated string constant"); }
 <STRING>"\n"                    { string_buf.append("\n"); }
 <STRING>"\t"                    { string_buf.append("\t"); }
@@ -199,11 +200,20 @@ z = [zZ]
         null_char_error = false;
         return new Symbol(TokenConstants.ERROR, "String contains null character");
     }
+
+    if (string_buf.length() >= MAX_STR_CONST) {
+        return new Symbol(TokenConstants.ERROR, "String constant too long");
+    }
     AbstractSymbol sym = AbstractTable.stringtable.addString(string_buf.toString());
     return new Symbol(TokenConstants.STR_CONST, sym); 
 }
 <STRING>.  { 
-    string_buf.append(yytext()); 
+    if (yytext().charAt(0) == '\0') {
+        null_char_error = true;
+    }
+    else {
+        string_buf.append(yytext()); 
+    }
 }
 
 <YYINITIAL>"(*"                 { yybegin(COMMENT); }

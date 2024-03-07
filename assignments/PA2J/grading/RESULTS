@@ -1,7 +1,2 @@
-	-1 (escapedunprintables)	 escaped nonprinting chars [submission crashed on this input]
-	-1 (longstring_escapedbackslashes)	 long strings with escaped characters
-	-1 (null_in_string)	 null char in string
-	-1 (null_in_string_followed_by_tokens)	 null char in string, then tokens
-	-1 (pathologicalstrings)	 some pathological strings
 	-1 (s04)	 different types of whitespaces [submission crashed on this input]
 	-1 (weirdcharcomment)	 various binary characters in a comment [submission crashed on this input]
