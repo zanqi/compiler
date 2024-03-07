@@ -17,6 +17,7 @@ import java_cup.runtime.Symbol;
     static int MAX_STR_CONST = 1025;
 
     boolean eof_flag = false;
+    boolean null_char_error = false;
     int comment_lvl = 0;
 
     // For assembling string constants
@@ -162,7 +163,6 @@ z = [zZ]
 <YYINITIAL>"*"             { return new Symbol(TokenConstants.MULT); }
 <YYINITIAL>"/"             { return new Symbol(TokenConstants.DIV); }
 
-<YYINITIAL>{underscore}    { return new Symbol(TokenConstants.ERROR, yytext()); }
 <YYINITIAL>{lowercase}({letter}|{digit}|{underscore})* { 
     AbstractSymbol sym = AbstractTable.idtable.addString(yytext());
     return new Symbol(TokenConstants.OBJECTID, sym);
@@ -185,10 +185,23 @@ z = [zZ]
 <STRING>"\t"                    { string_buf.append("\t"); }
 <STRING>"\b"                    { string_buf.append("\b"); }
 <STRING>"\f"                    { string_buf.append("\f"); }
-<STRING>{backslash}[^ntbf]      { string_buf.append(yytext().charAt(1));  }
-<STRING>{quote}                 { yybegin(YYINITIAL);
-                                AbstractSymbol sym = AbstractTable.stringtable.addString(string_buf.toString());
-                                return new Symbol(TokenConstants.STR_CONST, sym); }
+<STRING>{backslash}[^ntbf]      { 
+    if (yytext().charAt(1) == '\0') {
+        null_char_error = true;
+    }
+    else {
+        string_buf.append(yytext().charAt(1));
+    }
+}
+<STRING>{quote}                 { 
+    yybegin(YYINITIAL);
+    if (null_char_error) {
+        null_char_error = false;
+        return new Symbol(TokenConstants.ERROR, "String contains null character");
+    }
+    AbstractSymbol sym = AbstractTable.stringtable.addString(string_buf.toString());
+    return new Symbol(TokenConstants.STR_CONST, sym); 
+}
 <STRING>.  { 
     string_buf.append(yytext()); 
 }
@@ -219,4 +232,4 @@ z = [zZ]
                                      in your lexical specification and
                                      will match match everything not
                                      matched by other lexical rules. */
-                                  System.err.println("#" + (yyline+1) + " LEXER BUG - UNMATCHED: " + yytext()); }
+                                  return new Symbol(TokenConstants.ERROR, yytext()); }

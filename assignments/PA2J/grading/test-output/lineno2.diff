@@ -1,4 +1,0 @@
-1c1
-< #5 ERROR "!"
----
-> #5 LEXER BUG - UNMATCHED: !
