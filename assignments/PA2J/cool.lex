@@ -92,7 +92,7 @@ capital = [A-Z]
 space = [ ]
 underscore = [_]
 newline = [\n]
-whitespace = [ \t\n]
+whitespace = [ \t\n\r\f\b\013]
 backslash = [\\]
 quote = [\"]
 a = [aA]
@@ -219,7 +219,7 @@ z = [zZ]
 <YYINITIAL>"(*"                 { yybegin(COMMENT); }
 <COMMENT>"(*"                   { comment_lvl++; }
 <COMMENT>.                      { /* eat comments */ }
-<COMMENT>\n                     { }
+<COMMENT>{whitespace}           { }
 <COMMENT>"*)"                   { 
     if (comment_lvl == 0) {
         yybegin(YYINITIAL);
