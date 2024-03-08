@@ -1,7 +1,7 @@
 
 ASSN = 3J
 CLASS= cs143
-CLASSDIR= ../..
+CLASSDIR= /workspaces/compiler
 LIB=  -lfl 
 AR= gar
 ARCHIVE_NEW= -cr
@@ -41,7 +41,7 @@ CLS= ${CFIL:.java=.class}
 OUTPUT= good.output bad.output
 
 JAVAC := javac
-CUP := /usr/class/cs143/bin/java_cup
+CUP := /workspaces/compiler/bin/java_cup
 
 CUPCLASSPATH := ${CLASSDIR}/lib
 
