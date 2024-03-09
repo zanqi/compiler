@@ -41,7 +41,7 @@ CLS= ${CFIL:.java=.class}
 OUTPUT= good.output bad.output
 
 JAVAC := javac
-CUP := /workspaces/compiler/bin/java_cup
+CUP := ${CLASSDIR}/bin/java_cup
 
 CUPCLASSPATH := ${CLASSDIR}/lib
 
