@@ -1,0 +1,57 @@
+import java_cup.runtime.*;
+
+action code {: 
+    int[] symbols = new int[52];
+
+    public void updateSymbolVal(char id, int val) {
+        int index = computeIndex(id);   
+        if (index != -1) {
+            symbols[index] = val;
+        }
+    }
+
+    public int computeIndex(char id) {
+        if (Character.isUpperCase(id)) {
+            return id - 'A';
+        } else if (Character.isLowerCase(id) {
+            return id - 'a' + 26;
+        } else {
+            return -1;
+        }
+    }
+
+    public int symbolVal(char id) {
+        int index = computeIndex(id);
+        if (index != -1) {
+            return symbols[index];
+        } else {
+            return 0;
+        }
+    }
+:}
+
+terminal            ID, SEMI, PLUS, MINUS, EXIT_COMMAND, PRINT, EQ;
+terminal Integer    NUMBER;
+
+non_terminal Integer    line, exp, term;
+non_terminal Character  assignment;
+
+line ::= assignment SEMI {: ; :}
+    | EXIT_COMMAND SEMI {: System.exit(0); :}
+    | PRINT exp:e SEMI {: System.out.println(e); :}
+    | line assignment SEMI {: ; :}
+    | line EXIT_COMMAND SEMI {: System.exit(0); :}
+    | line PRINT exp:e SEMI {: System.out.println(e); :}
+    ;
+
+assignment ::= ID:id EQ exp:e {: updateSymbolVal(id, e); :}
+    ;
+
+exp ::= exp:e1 PLUS term:e2 {: RESULT = e1 + e2; :}
+    | exp:e1 MINUS term:e2 {: RESULT = e1 - e2; :}
+    | term:t {: RESULT = t; :}
+    ;
+
+term ::= NUMBER:n {: RESULT = n; :}
+    | ID:id {: RESULT = symbolVal(id); :}
+    ;
