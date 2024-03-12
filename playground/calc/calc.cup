@@ -30,11 +30,12 @@ action code {:
     }
 :}
 
-terminal            ID, SEMI, PLUS, MINUS, EXIT_COMMAND, PRINT, EQ;
+terminal            SEMI, PLUS, MINUS, EXIT_COMMAND, PRINT, EQ;
+terminal Character  ID;
 terminal Integer    NUMBER;
 
-non_terminal Integer    line, exp, term;
-non_terminal Character  assignment;
+nonterminal Integer    line, exp, term;
+nonterminal Character  assignment;
 
 line ::= assignment SEMI {: ; :}
     | EXIT_COMMAND SEMI {: System.exit(0); :}
