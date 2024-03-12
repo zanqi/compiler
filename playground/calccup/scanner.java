@@ -45,7 +45,7 @@ public class scanner {
                         i_val = i_val * 10 + (next_char - '0');
                         advance();
                     } while (next_char >= '0' && next_char <= '9');
-                    return sf.newSymbol("NUMBER", sym.NUMBER, new Integer(i_val));
+                    return sf.newSymbol("NUMBER", sym.NUMBER, Integer.valueOf(i_val));
 
                 case ';':
                     advance();
