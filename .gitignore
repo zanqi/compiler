@@ -29,3 +29,4 @@ replay_pid*
 assignments/PA2J/cgen
 assignments/PA2J/parser
 assignments/PA2J/semant
+playground/**/*.class

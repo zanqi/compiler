@@ -49,6 +49,7 @@ public class scanner {
 
                 case ';':
                     advance();
+                    System.out.println(next_char);
                     return sf.newSymbol("SEMI", sym.SEMI);
                 case '+':
                     advance();
@@ -68,7 +69,7 @@ public class scanner {
 
                 case -1:
                     return sf.newSymbol("EOF", sym.EOF);
-
+                
                 default:
                     /* in this simple scanner we just ignore everything else */
                     advance();

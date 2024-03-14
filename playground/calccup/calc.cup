@@ -31,7 +31,7 @@ expr_list ::= expr_list expr:e SEMI         {: System.out.println(e);:}
 ;
 */
 expr_list ::= NUMBER:n SEMI                 {: System.out.println(n);:}
-            | expr_list NUMBER:n SEMI         {: System.out.println(n);:}
+            | expr_list NUMBER:n SEMI       {: System.out.println(n);:}
             ;
 
 /*
