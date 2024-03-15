@@ -1,4 +1,5 @@
 import java_cup.runtime.*;
+import java.io.InputStreamReader;
 
 action code {: 
     int[] symbols = new int[52];
@@ -13,7 +14,7 @@ action code {:
     public int computeIndex(char id) {
         if (Character.isUpperCase(id)) {
             return id - 'A';
-        } else if (Character.isLowerCase(id) {
+        } else if (Character.isLowerCase(id)) {
             return id - 'a' + 26;
         } else {
             return -1;
@@ -30,7 +31,18 @@ action code {:
     }
 :}
 
-terminal            SEMI, PLUS, MINUS, EXIT_COMMAND, PRINT, EQ;
+parser code {: 
+    public static void main(String[] args) {
+        try {
+            Parser p = new Parser(new CalcLexer(new InputStreamReader(System.in)));
+            p.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+:}
+
+terminal            SEMI, PLUS, MINUS, EXIT_COMMAND, PRINT, EQ, NEWLINE;
 terminal Character  ID;
 terminal Integer    NUMBER;
 
