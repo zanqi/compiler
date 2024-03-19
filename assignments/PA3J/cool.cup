@@ -71,7 +71,7 @@ nonterminal Features dummy_feature_list;
 nonterminal Features feature_list;
 nonterminal Formals formal_list;
 nonterminal Expression expr;
-nonterminal Expressions param_list, group_expr_list;
+nonterminal Expressions param_list, block_expr_list;
 nonterminal Cases case_list;
 
 /* Precedence declarations go here. */
@@ -113,7 +113,7 @@ feature_list
     | feature_list:fl OBJECTID:n COLON TYPEID:t SEMI
         {: RESULT = fl.appendElement(
             new attr(curr_lineno(), n, t, new no_expr(curr_lineno()))); :}
-    | feature_list:fl OBJECTID:n LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE
+    | feature_list:fl OBJECTID:n LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
         {: RESULT = fl.appendElement(
             new method(curr_lineno(), n, fl2, t, e)); :}
     /* empty */
@@ -146,7 +146,9 @@ param_list
     ;
 
 expr
-    ::= INT_CONST:i
+    ::= OBJECTID:i ASSIGN expr:e
+        {: RESULT = new assign(curr_lineno(), i, e); :}
+    | INT_CONST:i
         {: RESULT = new int_const(curr_lineno(), i); :}
     | STR_CONST:s
         {: RESULT = new string_const(curr_lineno(), s); :}
@@ -164,6 +166,8 @@ expr
         {: RESULT = new mul(curr_lineno(), e1, e2); :}
     | expr:e1 DIV expr:e2
         {: RESULT = new divide(curr_lineno(), e1, e2); :}
+    | NEG expr:e
+        {: RESULT = new neg(curr_lineno(), e); :}
     | expr:e1 LT expr:e2
         {: RESULT = new lt(curr_lineno(), e1, e2); :}
     | expr:e1 LE expr:e2
@@ -188,18 +192,18 @@ expr
         {: RESULT = new typcase(curr_lineno(), e, cl); :}
     | NEW TYPEID:t
         {: RESULT = new new_(curr_lineno(), t); :}
-    | LBRACE group_expr_list:el RBRACE
+    | LBRACE block_expr_list:el RBRACE
         {: RESULT = new block(curr_lineno(), el); :}
     | LPAREN expr:e RPAREN
         {: RESULT = e; :}
     ;
 
-group_expr_list
+block_expr_list
     /* single expression */
     ::= expr:e SEMI
         {: RESULT = (new Expressions(curr_lineno())).appendElement(e); :}
     /* several expressions */
-    | group_expr_list:el expr:e SEMI
+    | block_expr_list:el expr:e SEMI
         {: RESULT = el.appendElement(e); :}
     ;
 
