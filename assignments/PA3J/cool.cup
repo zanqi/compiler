@@ -75,6 +75,9 @@ nonterminal Expressions param_list, block_expr_list;
 nonterminal Cases case_list;
 
 /* Precedence declarations go here. */
+precedence right ASSIGN;
+precedence left PLUS, MINUS;
+precedence left DIV, MULT;
 
 program	
     ::= class_list:cl
@@ -187,7 +190,7 @@ expr
     | WHILE expr:e1 LOOP expr:e2 POOL
         {: RESULT = new loop(curr_lineno(), e1, e2); :}
     | LET OBJECTID:id COLON TYPEID:t ASSIGN expr:i IN expr:e
-        {: RESULT = new let(curr_lineno(), id, t, i, e); :}
+        {: RESULT = new let(curr_lineno(), id, t, i, e); :} 
     | CASE expr:e OF case_list:cl ESAC
         {: RESULT = new typcase(curr_lineno(), e, cl); :}
     | NEW TYPEID:t

@@ -1,59 +1,5 @@
 Warning : Terminal "ERROR" was declared but never used
 Warning : Terminal "LET_STMT" was declared but never used
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) LE expr 
-  under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) EQ expr 
-  under symbol EQ
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) LT expr 
-  under symbol LT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol DOT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #57
-  between expr ::= expr DIV expr (*) 
-  and     expr ::= expr (*) AT TYPEID DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol AT
-  Resolved in favor of shifting.
-
 Warning : *** Shift/Reduce conflict found in state #137
   between feature_list ::= (*) 
   and     feature_list ::= (*) OBJECTID LPAREN formal_list RPAREN COLON TYPEID LBRACE expr RBRACE SEMI 
@@ -61,88 +7,10 @@ Warning : *** Shift/Reduce conflict found in state #137
   under symbol OBJECTID
   Resolved in favor of shifting.
 
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) LE expr 
-  under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) EQ expr 
-  under symbol EQ
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) LT expr 
-  under symbol LT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol DOT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #64
-  between expr ::= expr PLUS expr (*) 
-  and     expr ::= expr (*) AT TYPEID DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol AT
-  Resolved in favor of shifting.
-
 Warning : *** Shift/Reduce conflict found in state #77
   between expr ::= NOT expr (*) 
   and     expr ::= expr (*) LE expr 
   under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #77
-  between expr ::= NOT expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #77
-  between expr ::= NOT expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #77
-  between expr ::= NOT expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #77
-  between expr ::= NOT expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
   Resolved in favor of shifting.
 
 Warning : *** Shift/Reduce conflict found in state #77
@@ -177,30 +45,6 @@ Warning : *** Shift/Reduce conflict found in state #73
 
 Warning : *** Shift/Reduce conflict found in state #73
   between expr ::= LET OBJECTID COLON TYPEID ASSIGN expr IN expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #73
-  between expr ::= LET OBJECTID COLON TYPEID ASSIGN expr IN expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #73
-  between expr ::= LET OBJECTID COLON TYPEID ASSIGN expr IN expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #73
-  between expr ::= LET OBJECTID COLON TYPEID ASSIGN expr IN expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #73
-  between expr ::= LET OBJECTID COLON TYPEID ASSIGN expr IN expr (*) 
   and     expr ::= expr (*) EQ expr 
   under symbol EQ
   Resolved in favor of shifting.
@@ -227,30 +71,6 @@ Warning : *** Shift/Reduce conflict found in state #47
   between expr ::= expr LT expr (*) 
   and     expr ::= expr (*) LE expr 
   under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #47
-  between expr ::= expr LT expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #47
-  between expr ::= expr LT expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #47
-  between expr ::= expr LT expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #47
-  between expr ::= expr LT expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
   Resolved in favor of shifting.
 
 Warning : *** Shift/Reduce conflict found in state #47
@@ -292,30 +112,6 @@ Warning : *** Shift/Reduce conflict found in state #63
 
 Warning : *** Shift/Reduce conflict found in state #63
   between expr ::= expr EQ expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #63
-  between expr ::= expr EQ expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #63
-  between expr ::= expr EQ expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #63
-  between expr ::= expr EQ expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #63
-  between expr ::= expr EQ expr (*) 
   and     expr ::= expr (*) EQ expr 
   under symbol EQ
   Resolved in favor of shifting.
@@ -346,30 +142,6 @@ Warning : *** Shift/Reduce conflict found in state #62
 
 Warning : *** Shift/Reduce conflict found in state #62
   between expr ::= expr LE expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #62
-  between expr ::= expr LE expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #62
-  between expr ::= expr LE expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #62
-  between expr ::= expr LE expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #62
-  between expr ::= expr LE expr (*) 
   and     expr ::= expr (*) EQ expr 
   under symbol EQ
   Resolved in favor of shifting.
@@ -392,88 +164,10 @@ Warning : *** Shift/Reduce conflict found in state #62
   under symbol AT
   Resolved in favor of shifting.
 
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) LE expr 
-  under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) EQ expr 
-  under symbol EQ
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) LT expr 
-  under symbol LT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol DOT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #96
-  between expr ::= OBJECTID ASSIGN expr (*) 
-  and     expr ::= expr (*) AT TYPEID DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol AT
-  Resolved in favor of shifting.
-
 Warning : *** Shift/Reduce conflict found in state #99
   between expr ::= ISVOID expr (*) 
   and     expr ::= expr (*) LE expr 
   under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #99
-  between expr ::= ISVOID expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #99
-  between expr ::= ISVOID expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #99
-  between expr ::= ISVOID expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #99
-  between expr ::= ISVOID expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
   Resolved in favor of shifting.
 
 Warning : *** Shift/Reduce conflict found in state #99
@@ -496,114 +190,6 @@ Warning : *** Shift/Reduce conflict found in state #99
 
 Warning : *** Shift/Reduce conflict found in state #99
   between expr ::= ISVOID expr (*) 
-  and     expr ::= expr (*) AT TYPEID DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol AT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) LE expr 
-  under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) EQ expr 
-  under symbol EQ
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) LT expr 
-  under symbol LT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol DOT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #65
-  between expr ::= expr MULT expr (*) 
-  and     expr ::= expr (*) AT TYPEID DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol AT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) LE expr 
-  under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) EQ expr 
-  under symbol EQ
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) LT expr 
-  under symbol LT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
-  and     expr ::= expr (*) DOT OBJECTID LPAREN param_list RPAREN 
-  under symbol DOT
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #66
-  between expr ::= expr MINUS expr (*) 
   and     expr ::= expr (*) AT TYPEID DOT OBJECTID LPAREN param_list RPAREN 
   under symbol AT
   Resolved in favor of shifting.
@@ -619,30 +205,6 @@ Warning : *** Shift/Reduce conflict found in state #74
   between expr ::= NEG expr (*) 
   and     expr ::= expr (*) LE expr 
   under symbol LE
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #74
-  between expr ::= NEG expr (*) 
-  and     expr ::= expr (*) PLUS expr 
-  under symbol PLUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #74
-  between expr ::= NEG expr (*) 
-  and     expr ::= expr (*) DIV expr 
-  under symbol DIV
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #74
-  between expr ::= NEG expr (*) 
-  and     expr ::= expr (*) MINUS expr 
-  under symbol MINUS
-  Resolved in favor of shifting.
-
-Warning : *** Shift/Reduce conflict found in state #74
-  between expr ::= NEG expr (*) 
-  and     expr ::= expr (*) MULT expr 
-  under symbol MULT
   Resolved in favor of shifting.
 
 Warning : *** Shift/Reduce conflict found in state #74
@@ -3668,13 +3230,13 @@ From state #57
  [term 3:REDUCE(with prod 27)] [term 4:REDUCE(with prod 27)]
  [term 6:REDUCE(with prod 27)] [term 10:REDUCE(with prod 27)]
  [term 11:REDUCE(with prod 27)] [term 12:REDUCE(with prod 27)]
- [term 16:REDUCE(with prod 27)] [term 22:SHIFT(to state 41)]
- [term 24:SHIFT(to state 39)] [term 25:SHIFT(to state 43)]
- [term 26:SHIFT(to state 37)] [term 27:SHIFT(to state 38)]
- [term 28:SHIFT(to state 40)] [term 29:SHIFT(to state 46)]
- [term 30:SHIFT(to state 42)] [term 32:REDUCE(with prod 27)]
+ [term 16:REDUCE(with prod 27)] [term 22:REDUCE(with prod 27)]
+ [term 24:REDUCE(with prod 27)] [term 25:REDUCE(with prod 27)]
+ [term 26:REDUCE(with prod 27)] [term 27:REDUCE(with prod 27)]
+ [term 28:REDUCE(with prod 27)] [term 29:REDUCE(with prod 27)]
+ [term 30:REDUCE(with prod 27)] [term 32:REDUCE(with prod 27)]
  [term 33:REDUCE(with prod 27)] [term 36:REDUCE(with prod 27)]
- [term 37:SHIFT(to state 45)] [term 39:REDUCE(with prod 27)]
+ [term 37:REDUCE(with prod 27)] [term 39:REDUCE(with prod 27)]
 From state #58
  [term 35:SHIFT(to state 59)]
 From state #59
@@ -3725,35 +3287,35 @@ From state #64
  [term 3:REDUCE(with prod 24)] [term 4:REDUCE(with prod 24)]
  [term 6:REDUCE(with prod 24)] [term 10:REDUCE(with prod 24)]
  [term 11:REDUCE(with prod 24)] [term 12:REDUCE(with prod 24)]
- [term 16:REDUCE(with prod 24)] [term 22:SHIFT(to state 41)]
- [term 24:SHIFT(to state 39)] [term 25:SHIFT(to state 43)]
- [term 26:SHIFT(to state 37)] [term 27:SHIFT(to state 38)]
- [term 28:SHIFT(to state 40)] [term 29:SHIFT(to state 46)]
- [term 30:SHIFT(to state 42)] [term 32:REDUCE(with prod 24)]
+ [term 16:REDUCE(with prod 24)] [term 22:REDUCE(with prod 24)]
+ [term 24:REDUCE(with prod 24)] [term 25:SHIFT(to state 43)]
+ [term 26:REDUCE(with prod 24)] [term 27:SHIFT(to state 38)]
+ [term 28:REDUCE(with prod 24)] [term 29:REDUCE(with prod 24)]
+ [term 30:REDUCE(with prod 24)] [term 32:REDUCE(with prod 24)]
  [term 33:REDUCE(with prod 24)] [term 36:REDUCE(with prod 24)]
- [term 37:SHIFT(to state 45)] [term 39:REDUCE(with prod 24)]
+ [term 37:REDUCE(with prod 24)] [term 39:REDUCE(with prod 24)]
 From state #65
  [term 3:REDUCE(with prod 26)] [term 4:REDUCE(with prod 26)]
  [term 6:REDUCE(with prod 26)] [term 10:REDUCE(with prod 26)]
  [term 11:REDUCE(with prod 26)] [term 12:REDUCE(with prod 26)]
- [term 16:REDUCE(with prod 26)] [term 22:SHIFT(to state 41)]
- [term 24:SHIFT(to state 39)] [term 25:SHIFT(to state 43)]
- [term 26:SHIFT(to state 37)] [term 27:SHIFT(to state 38)]
- [term 28:SHIFT(to state 40)] [term 29:SHIFT(to state 46)]
- [term 30:SHIFT(to state 42)] [term 32:REDUCE(with prod 26)]
+ [term 16:REDUCE(with prod 26)] [term 22:REDUCE(with prod 26)]
+ [term 24:REDUCE(with prod 26)] [term 25:REDUCE(with prod 26)]
+ [term 26:REDUCE(with prod 26)] [term 27:REDUCE(with prod 26)]
+ [term 28:REDUCE(with prod 26)] [term 29:REDUCE(with prod 26)]
+ [term 30:REDUCE(with prod 26)] [term 32:REDUCE(with prod 26)]
  [term 33:REDUCE(with prod 26)] [term 36:REDUCE(with prod 26)]
- [term 37:SHIFT(to state 45)] [term 39:REDUCE(with prod 26)]
+ [term 37:REDUCE(with prod 26)] [term 39:REDUCE(with prod 26)]
 From state #66
  [term 3:REDUCE(with prod 25)] [term 4:REDUCE(with prod 25)]
  [term 6:REDUCE(with prod 25)] [term 10:REDUCE(with prod 25)]
  [term 11:REDUCE(with prod 25)] [term 12:REDUCE(with prod 25)]
- [term 16:REDUCE(with prod 25)] [term 22:SHIFT(to state 41)]
- [term 24:SHIFT(to state 39)] [term 25:SHIFT(to state 43)]
- [term 26:SHIFT(to state 37)] [term 27:SHIFT(to state 38)]
- [term 28:SHIFT(to state 40)] [term 29:SHIFT(to state 46)]
- [term 30:SHIFT(to state 42)] [term 32:REDUCE(with prod 25)]
+ [term 16:REDUCE(with prod 25)] [term 22:REDUCE(with prod 25)]
+ [term 24:REDUCE(with prod 25)] [term 25:SHIFT(to state 43)]
+ [term 26:REDUCE(with prod 25)] [term 27:SHIFT(to state 38)]
+ [term 28:REDUCE(with prod 25)] [term 29:REDUCE(with prod 25)]
+ [term 30:REDUCE(with prod 25)] [term 32:REDUCE(with prod 25)]
  [term 33:REDUCE(with prod 25)] [term 36:REDUCE(with prod 25)]
- [term 37:SHIFT(to state 45)] [term 39:REDUCE(with prod 25)]
+ [term 37:REDUCE(with prod 25)] [term 39:REDUCE(with prod 25)]
 From state #67
  [term 34:SHIFT(to state 68)]
 From state #68
@@ -3905,13 +3467,13 @@ From state #96
  [term 3:REDUCE(with prod 18)] [term 4:REDUCE(with prod 18)]
  [term 6:REDUCE(with prod 18)] [term 10:REDUCE(with prod 18)]
  [term 11:REDUCE(with prod 18)] [term 12:REDUCE(with prod 18)]
- [term 16:REDUCE(with prod 18)] [term 22:SHIFT(to state 41)]
+ [term 16:REDUCE(with prod 18)] [term 22:REDUCE(with prod 18)]
  [term 24:SHIFT(to state 39)] [term 25:SHIFT(to state 43)]
  [term 26:SHIFT(to state 37)] [term 27:SHIFT(to state 38)]
- [term 28:SHIFT(to state 40)] [term 29:SHIFT(to state 46)]
- [term 30:SHIFT(to state 42)] [term 32:REDUCE(with prod 18)]
+ [term 28:REDUCE(with prod 18)] [term 29:REDUCE(with prod 18)]
+ [term 30:REDUCE(with prod 18)] [term 32:REDUCE(with prod 18)]
  [term 33:REDUCE(with prod 18)] [term 36:REDUCE(with prod 18)]
- [term 37:SHIFT(to state 45)] [term 39:REDUCE(with prod 18)]
+ [term 37:REDUCE(with prod 18)] [term 39:REDUCE(with prod 18)]
 From state #97
  [term 32:SHIFT(to state 54)] [term 36:SHIFT(to state 98)]
 From state #98
@@ -4339,12 +3901,12 @@ From state #147
 From state #148
 -----------------------------
 ------- CUP v0.11a beta 20060608 Parser Generation Summary -------
-  0 errors and 114 warnings
+  0 errors and 41 warnings
   45 terminals, 10 non-terminals, and 48 productions declared, 
   producing 149 unique parse states.
   2 terminals declared but not used.
   0 non-terminals declared but not used.
   0 productions never reduced.
-  111 conflicts detected (10000 expected).
+  38 conflicts detected (10000 expected).
   Code written to "CoolParser.java", and "TokenConstants.java".
 ---------------------------------------------------- (v0.11a beta 20060608)
