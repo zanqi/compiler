@@ -30,3 +30,4 @@ assignments/PA2J/cgen
 assignments/PA2J/parser
 assignments/PA2J/semant
 playground/**/*.class
+assignments/**/grading/*
