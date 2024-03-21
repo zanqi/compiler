@@ -20,6 +20,15 @@ action code {:
     AbstractSymbol curr_filename() {
         return ((CoolTokenLexer)parser.getScanner()).curr_filename();
     }
+
+    let create_let(int lineno, Features l, Expression e) {
+        let result = null;
+        for (int i = l.getLength() - 1; i >= 0; i--) {
+            attr a = (attr)l.getNth(i);
+            result = new let(lineno, a.name, a.type_decl, a.init, result == null ? e : result);
+        }
+        return result;
+    }
 :} 
 
 /************************************************************************/
@@ -68,7 +77,7 @@ nonterminal programc program;
 nonterminal Classes class_list;
 nonterminal class_c class;
 nonterminal Features dummy_feature_list;
-nonterminal Features feature_list;
+nonterminal Features feature_list, let_stmt_list;
 nonterminal Formals formal_list;
 nonterminal Expression expr;
 nonterminal Expressions param_list, block_expr_list;
@@ -76,8 +85,14 @@ nonterminal Cases case_list;
 
 /* Precedence declarations go here. */
 precedence right ASSIGN;
+precedence left NOT;
+precedence left LE, LT, EQ;
 precedence left PLUS, MINUS;
 precedence left DIV, MULT;
+precedence left ISVOID;
+precedence left NEG;
+precedence left AT;
+precedence left DOT;
 
 program	
     ::= class_list:cl
@@ -105,23 +120,31 @@ class
     ;
 
 feature_list 
-    /* single feature */
-    ::= OBJECTID:n COLON TYPEID:t SEMI
-        {: RESULT = (new Features(curr_lineno())).appendElement(
-            new attr(curr_lineno(), n, t, new no_expr(curr_lineno()))); :}
-    | OBJECTID:n LPAREN formal_list:fl RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
-        {: RESULT = (new Features(curr_lineno())).appendElement(
-            new method(curr_lineno(), n, fl, t, e)); :}
-    /* several features */
-    | feature_list:fl OBJECTID:n COLON TYPEID:t SEMI
+    ::= feature_list:fl OBJECTID:n COLON TYPEID:t SEMI
         {: RESULT = fl.appendElement(
             new attr(curr_lineno(), n, t, new no_expr(curr_lineno()))); :}
+    | feature_list:fl OBJECTID:n COLON TYPEID:t ASSIGN expr:e SEMI
+        {: RESULT = fl.appendElement(
+            new attr(curr_lineno(), n, t, e)); :}
     | feature_list:fl OBJECTID:n LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
         {: RESULT = fl.appendElement(
             new method(curr_lineno(), n, fl2, t, e)); :}
     /* empty */
     | 
         {: RESULT = new Features(curr_lineno()); :}
+    ;
+
+let_stmt_list
+    ::= OBJECTID:id COLON TYPEID:t
+        {: RESULT = (new Features(curr_lineno())).appendElement(
+            new attr(curr_lineno(), id, t, new no_expr(curr_lineno()))); :}
+    | OBJECTID:id COLON TYPEID:t ASSIGN expr:i
+        {: RESULT = (new Features(curr_lineno())).appendElement(
+            new attr(curr_lineno(), id, t, i)); :}
+    | let_stmt_list:ll COMMA OBJECTID:id COLON TYPEID:t 
+        {: RESULT = ll.appendElement(new attr(curr_lineno(), id, t, new no_expr(curr_lineno()))); :}
+    | let_stmt_list:ll COMMA OBJECTID:id COLON TYPEID:t ASSIGN expr:i
+        {: RESULT = ll.appendElement(new attr(curr_lineno(), id, t, i)); :}
     ;
 
 formal_list
@@ -189,8 +212,8 @@ expr
         {: RESULT = new cond(curr_lineno(), e1, e2, e3); :}
     | WHILE expr:e1 LOOP expr:e2 POOL
         {: RESULT = new loop(curr_lineno(), e1, e2); :}
-    | LET OBJECTID:id COLON TYPEID:t ASSIGN expr:i IN expr:e
-        {: RESULT = new let(curr_lineno(), id, t, i, e); :} 
+    | LET let_stmt_list:l IN expr:e
+        {: RESULT = create_let(curr_lineno(), l, e); :} 
     | CASE expr:e OF case_list:cl ESAC
         {: RESULT = new typcase(curr_lineno(), e, cl); :}
     | NEW TYPEID:t

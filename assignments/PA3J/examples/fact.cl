@@ -1,6 +1,6 @@
 class Main inherits A2I {
     main() : Object {
-        (new IO).out_string(i2a(fact(a2i((new IO).in_string()))).concat("\n"))
+        (new IO).out_string(i2a(factRecur(a2i((new IO).in_string()))).concat("\n"))
     };
 
     i2cT(i : Int) : String {
