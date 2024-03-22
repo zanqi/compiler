@@ -41,7 +41,7 @@ parser code {:
         int lineno = action_obj.curr_lineno();
         String filename = action_obj.curr_filename().getString();
         System.err.print("\"" + filename + "\", line " + lineno + 
-                 ": parse error at or near ");
+                 ": syntax error at or near ");
         Utilities.printToken(cur_token);
         omerrs++;
         if (omerrs>50) {
@@ -117,6 +117,7 @@ class
     | CLASS TYPEID:n INHERITS TYPEID:p LBRACE feature_list:f RBRACE SEMI
         {: RESULT = new class_c(curr_lineno(), n, p, f, curr_filename()); :}
     | CLASS error LBRACE feature_list:f RBRACE SEMI
+    | CLASS TYPEID LBRACE error RBRACE SEMI
     ;
 
 feature_list 
@@ -129,6 +130,7 @@ feature_list
     | feature_list:fl OBJECTID:n LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
         {: RESULT = fl.appendElement(
             new method(curr_lineno(), n, fl2, t, e)); :}
+    | feature_list:fl error LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
     /* empty */
     | 
         {: RESULT = new Features(curr_lineno()); :}
@@ -208,6 +210,7 @@ expr
         {: RESULT = new dispatch(curr_lineno(), e1, o, el); :}
     | OBJECTID:id LPAREN param_list:el RPAREN
         {: RESULT = new dispatch(curr_lineno(), new object(curr_lineno(), AbstractTable.idtable.addString("self")), id, el); :}
+    | OBJECTID:id LPAREN error RPAREN
     | IF expr:e1 THEN expr:e2 ELSE expr:e3 FI
         {: RESULT = new cond(curr_lineno(), e1, e2, e3); :}
     | WHILE expr:e1 LOOP expr:e2 POOL
@@ -229,6 +232,7 @@ block_expr_list
     ::= expr:e SEMI
         {: RESULT = (new Expressions(curr_lineno())).appendElement(e); :}
     /* several expressions */
+    | error SEMI
     | block_expr_list:el expr:e SEMI
         {: RESULT = el.appendElement(e); :}
     ;
