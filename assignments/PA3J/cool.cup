@@ -130,7 +130,12 @@ feature_list
     | feature_list:fl OBJECTID:n LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
         {: RESULT = fl.appendElement(
             new method(curr_lineno(), n, fl2, t, e)); :}
+    | feature_list:fl OBJECTID:n COLON error SEMI
+        {: RESULT = fl; :}
     | feature_list:fl error LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE expr:e RBRACE SEMI
+        {: RESULT = fl; :}
+    | feature_list:fl OBJECTID:n LPAREN formal_list:fl2 RPAREN COLON TYPEID:t LBRACE error RBRACE SEMI
+        {: RESULT = fl; :}
     /* empty */
     | 
         {: RESULT = new Features(curr_lineno()); :}
@@ -232,7 +237,8 @@ block_expr_list
     ::= expr:e SEMI
         {: RESULT = (new Expressions(curr_lineno())).appendElement(e); :}
     /* several expressions */
-    | error SEMI
+    | block_expr_list:el error SEMI 
+        {: RESULT = el; :}
     | block_expr_list:el expr:e SEMI
         {: RESULT = el.appendElement(e); :}
     ;
