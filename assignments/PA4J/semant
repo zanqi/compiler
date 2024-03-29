@@ -1,0 +1,2 @@
+#!/bin/sh
+java -classpath /workspaces/compiler/lib:.:/usr/java/lib/rt.jar Semant $*
