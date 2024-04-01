@@ -1,0 +1,2 @@
+#!/bin/csh -f
+./lexer $* | ./parser $* | /workspaces/compiler/bin/semant $* 

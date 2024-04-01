@@ -61,9 +61,11 @@ symtab-example: Makefile ${CLS}
 
 dotest:	semant good.cl bad.cl
 	@echo "\nRunning semant on good.cl\n"
-	-./mysemant good.cl 
+	-./mysemant -s good.cl > good.output
+	-./osemant good.cl > ogood.output
 	@echo "\nRunning semant on bad.cl\n"
-	-./mysemant bad.cl
+	-./mysemant -s bad.cl > bad.output
+	-./osemant bad.cl > obad.output
 
 ## cool-tree.class is not a real class file, but we need to have it
 ## for dependency tracking

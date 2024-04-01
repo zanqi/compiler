@@ -1,0 +1,87 @@
+#1								#1
+_program							_program
+  #1								  #1
+  _class							  _class
+    C								    C
+    Object							    Object
+    "good.cl"							    "good.cl"
+    (								    (
+    #2								    #2
+    _attr							    _attr
+      a								      a
+      Int							      Int
+      #0							      #0
+      _no_expr							      _no_expr
+      : _no_type						      : _no_type
+    #3								    #3
+    _attr							    _attr
+      b								      b
+      Bool							      Bool
+      #0							      #0
+      _no_expr							      _no_expr
+      : _no_type						      : _no_type
+    #4								    #4
+    _method							    _method
+      init							      init
+      #4							      #4
+      _formal							      _formal
+        x							        x
+        Int							        Int
+      #4							      #4
+      _formal							      _formal
+        y							        y
+        Bool							        Bool
+      C								      C
+      #5							      #5
+      _block							      _block
+        #6							        #6
+        _assign							        _assign
+          a							          a
+          #6							          #6
+          _object						          _object
+            x							            x
+          : _no_type					      |	          : Int
+        : _no_type					      |	        : Int
+        #7							        #7
+        _assign							        _assign
+          b							          b
+          #7							          #7
+          _object						          _object
+            y							            y
+          : _no_type					      |	          : Bool
+        : _no_type					      |	        : Bool
+        #8							        #8
+        _object							        _object
+          self							          self
+        : _no_type					      |	        : SELF_TYPE
+      : _no_type					      |	      : SELF_TYPE
+    )								    )
+  #13								  #13
+  _class							  _class
+    Main							    Main
+    Object							    Object
+    "good.cl"							    "good.cl"
+    (								    (
+    #14								    #14
+    _method							    _method
+      main							      main
+      C								      C
+      #15							      #15
+      _dispatch							      _dispatch
+        #15							        #15
+        _new							        _new
+          C							          C
+        : _no_type					      |	        : C
+        init							        init
+        (							        (
+        #15							        #15
+        _int							        _int
+          1							          1
+        : _no_type					      |	        : Int
+        #15							        #15
+        _bool							        _bool
+          1							          1
+        : Bool							        : Bool
+        )							        )
+      : _no_type					      |	      : C
+    )								    )
