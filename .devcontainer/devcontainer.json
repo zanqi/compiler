@@ -23,8 +23,9 @@
 		}
 	},
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {}
-	}
+		"ghcr.io/devcontainers/features/java:1": {},
+		"ghcr.io/devcontainers/features/git:1": {}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -33,7 +34,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "PATH=/usr/class/cs143/cool/bin:$PATH",
+	"postCreateCommand": "ln -s /workspaces/compiler /usr/class/cs143/cool",
 
 	// Configure tool-specific properties.
 	// "customizations": 

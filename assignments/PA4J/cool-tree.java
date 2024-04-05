@@ -178,8 +178,7 @@ abstract class Expression extends TreeNode {
         }
     }
 
-    public abstract void typeCheck(SymbolTable classTable, AbstractSymbol name);
-
+    public abstract void typeCheck(ClassTable classTable, class_c c);
 }
 
 /**
@@ -623,6 +622,21 @@ class assign extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        expr.typeCheck(classTable, c);
+        AbstractSymbol type = classTable.getObjectType(name);
+        if (type == null) {
+            classTable.semantError().println("Assignment to undeclared variable " + name);
+            set_type(TreeConstants.Object_);
+        } else if (!classTable.isSubtype(expr.get_type(), type)) {
+            classTable.semantError().println("Type mismatch in assignment to " + name + ": " + type + " <- "
+                    + expr.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(type);
+        }
+    }
 }
 
 /**
@@ -680,6 +694,40 @@ class static_dispatch extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        expr.typeCheck(classTable, c);
+        // check if the method is defined in the class
+        method m = classTable.getMethod(type_name, name);
+        if (m == null) {
+            classTable.semantError(c, this).println("Dispatch to undefined method " + name + ".");
+            set_type(TreeConstants.Object_);
+        } else {
+            // check parameter expressions types match the method signature
+            if (m.formals.getLength() != actual.getLength()) {
+                classTable.semantError().println("Method " + name + " called with wrong number of arguments");
+                set_type(TreeConstants.Object_);
+                return;
+            }
+            for (int i = 0; i < actual.getLength(); i++) {
+                Expression e = (Expression) actual.getNth(i);
+                e.typeCheck(classTable, c);
+                formalc formal = (formalc) m.formals.getNth(i);
+                if (!classTable.isSubtype(e.get_type(), formal.type_decl)) {
+                    classTable.semantError().println("In call of method " + name + ", type " + e.get_type()
+                            + " of parameter " + formal.name + " does not conform to declared type " + formal.type_decl
+                            + ".");
+                    set_type(TreeConstants.Object_);
+                    return;
+                }
+            }
+            if (m.return_type == TreeConstants.SELF_TYPE) {
+                set_type(expr.get_type());
+            } else {
+                set_type(m.return_type);
+            }
+        }
+    }
 }
 
 /**
@@ -733,21 +781,36 @@ class dispatch extends Expression {
     }
 
     @Override
-    public void typeCheck(SymbolTable classTable, AbstractSymbol className) {
-        expr.typeCheck(classTable, name);
-        for (Enumeration e = actual.getElements(); e.hasMoreElements();) {
-            ((Expression) e.nextElement()).typeCheck(classTable, name);
-        }
+    public void typeCheck(ClassTable classTable, class_c c) {
+        expr.typeCheck(classTable, c);
         // check if the method is defined in the class
-        if (!classTable.checkMethod(className, name)) {
-            classTable.semantError().println("Method " + name + " is not defined in class " + className);
+        method m = classTable.getMethod(expr.get_type(), name);
+        if (m == null) {
+            classTable.semantError(c, this).println("Dispatch to undefined method " + name + ".");
             set_type(TreeConstants.Object_);
         } else {
-            AbstractSymbol returnType = classTable.getMethodReturnType(className, name);
-            if (returnType == TreeConstants.SELF_TYPE) {
+            // check parameter expressions types match the method signature
+            if (m.formals.getLength() != actual.getLength()) {
+                classTable.semantError(c, this).println("Method " + name + " called with wrong number of arguments.");
+                set_type(TreeConstants.Object_);
+                return;
+            }
+            for (int i = 0; i < actual.getLength(); i++) {
+                Expression e = (Expression) actual.getNth(i);
+                e.typeCheck(classTable, c);
+                formalc formal = (formalc) m.formals.getNth(i);
+                if (!classTable.isSubtype(e.get_type(), formal.type_decl)) {
+                    classTable.semantError(c, this).println("In call of method " + name + ", type " + e.get_type()
+                            + " of parameter " + formal.name + " does not conform to declared type "
+                            + formal.type_decl + ".");
+                    set_type(TreeConstants.Object_);
+                    return;
+                }
+            }
+            if (m.return_type == TreeConstants.SELF_TYPE) {
                 set_type(expr.get_type());
             } else {
-                set_type(returnType);
+                set_type(m.return_type);
             }
         }
     }
@@ -800,6 +863,18 @@ class cond extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        pred.typeCheck(classTable, c);
+        then_exp.typeCheck(classTable, c);
+        else_exp.typeCheck(classTable, c);
+        if (!pred.get_type().equals(TreeConstants.Bool)) {
+            classTable.semantError().println("Predicate of if statement is not of type Bool: " + pred.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(classTable.getLCA(then_exp.get_type(), else_exp.get_type()));
+        }
+    }
 }
 
 /**
@@ -842,6 +917,17 @@ class loop extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        pred.typeCheck(classTable, c);
+        body.typeCheck(classTable, c);
+        if (!pred.get_type().equals(TreeConstants.Bool)) {
+            classTable.semantError().println("Predicate of while loop is not of type Bool: " + pred.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Object_);
+        }
+    }
 }
 
 /**
@@ -886,6 +972,24 @@ class typcase extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        expr.typeCheck(classTable, c);
+        AbstractSymbol type = null;
+        for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
+            branch b = (branch) e.nextElement();
+            classTable.enterScope();
+            classTable.addId(b.name, b.type_decl);
+            b.expr.typeCheck(classTable, c);
+            classTable.exitScope();
+            if (type == null) {
+                type = b.expr.get_type();
+            } else {
+                type = classTable.getLCA(type, b.expr.get_type());
+            }
+        }
+        set_type(type);
+    }
 }
 
 /**
@@ -925,6 +1029,16 @@ class block extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        AbstractSymbol type = null;
+        for (Enumeration e = body.getElements(); e.hasMoreElements();) {
+            Expression expr = (Expression) e.nextElement();
+            expr.typeCheck(classTable, c);
+            type = expr.get_type();
+        }
+        set_type(type);
+    }
 }
 
 /**
@@ -978,6 +1092,15 @@ class let extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        classTable.enterScope();
+        classTable.addId(identifier, type_decl);
+        init.typeCheck(classTable, c);
+        body.typeCheck(classTable, c);
+        classTable.exitScope();
+        set_type(body.get_type());
+    }
 }
 
 /**
@@ -1020,6 +1143,19 @@ class plus extends Expression {
         dump_type(out, n);
     }
 
+    // If type check succeeds, set the type of the expression.
+    // Otherwise, set the type to Object_ and print an error message.
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int) || !e2.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Non-Int arguments: " + e1.get_type() + " + " + e2.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Int);
+        }
+    }
 }
 
 /**
@@ -1060,6 +1196,18 @@ class sub extends Expression {
         e1.dump_with_types(out, n + 2);
         e2.dump_with_types(out, n + 2);
         dump_type(out, n);
+    }
+
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int) || !e2.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Non-Int arguments: " + e1.get_type() + " - " + e2.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Int);
+        }
     }
 
 }
@@ -1104,6 +1252,18 @@ class mul extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int) || !e2.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Non-Int arguments: " + e1.get_type() + " * " + e2.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Int);
+        }
+    }
+
 }
 
 /**
@@ -1146,6 +1306,17 @@ class divide extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int) || !e2.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Non-Int arguments: " + e1.get_type() + " / " + e2.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Int);
+        }
+    }
 }
 
 /**
@@ -1181,6 +1352,17 @@ class neg extends Expression {
         out.println(Utilities.pad(n) + "_neg");
         e1.dump_with_types(out, n + 2);
         dump_type(out, n);
+    }
+
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Argument of '~' has type " + e1.get_type() + " instead of Int");
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Int);
+        }
     }
 
 }
@@ -1225,6 +1407,17 @@ class lt extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int) || !e2.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Non-Int arguments: " + e1.get_type() + " < " + e2.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Bool);
+        }
+    }
 }
 
 /**
@@ -1265,6 +1458,21 @@ class eq extends Expression {
         e1.dump_with_types(out, n + 2);
         e2.dump_with_types(out, n + 2);
         dump_type(out, n);
+    }
+
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if ((e1.get_type().equals(TreeConstants.Int) || e1.get_type().equals(TreeConstants.Bool)
+                || e1.get_type().equals(TreeConstants.Str) || e2.get_type().equals(TreeConstants.Int)
+                || e2.get_type().equals(TreeConstants.Bool) || e2.get_type().equals(TreeConstants.Str))
+                && !e1.get_type().equals(e2.get_type())) {
+            classTable.semantError().println("Illegal comparison with a basic type");
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Bool);
+        }
     }
 
 }
@@ -1309,6 +1517,17 @@ class leq extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        e2.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Int) || !e2.get_type().equals(TreeConstants.Int)) {
+            classTable.semantError().println("Non-Int arguments: " + e1.get_type() + " <= " + e2.get_type());
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Bool);
+        }
+    }
 }
 
 /**
@@ -1346,6 +1565,16 @@ class comp extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        if (!e1.get_type().equals(TreeConstants.Bool)) {
+            classTable.semantError().println("Argument of 'not' has type " + e1.get_type() + " instead of Bool");
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(TreeConstants.Bool);
+        }
+    }
 }
 
 /**
@@ -1383,6 +1612,10 @@ class int_const extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        set_type(TreeConstants.Int);
+    }
 }
 
 /**
@@ -1420,6 +1653,10 @@ class bool_const extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        set_type(TreeConstants.Bool);
+    }
 }
 
 /**
@@ -1459,6 +1696,10 @@ class string_const extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        set_type(TreeConstants.Str);
+    }
 }
 
 /**
@@ -1496,6 +1737,17 @@ class new_ extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        if (type_name.equals(TreeConstants.SELF_TYPE)) {
+            set_type(TreeConstants.SELF_TYPE);
+        } else if (!classTable.hasClass(type_name)) {
+            classTable.semantError().println("Class " + type_name + " is not defined");
+            set_type(TreeConstants.Object_);
+        } else {
+            set_type(type_name);
+        }
+    }
 }
 
 /**
@@ -1533,6 +1785,11 @@ class isvoid extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        e1.typeCheck(classTable, c);
+        set_type(TreeConstants.Bool);
+    }
 }
 
 /**
@@ -1564,6 +1821,10 @@ class no_expr extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        set_type(TreeConstants.No_type);
+    }
 }
 
 /**
@@ -1601,4 +1862,18 @@ class object extends Expression {
         dump_type(out, n);
     }
 
+    @Override
+    public void typeCheck(ClassTable classTable, class_c c) {
+        if (name.equals(TreeConstants.self)) {
+            set_type(TreeConstants.SELF_TYPE);
+        } else {
+            AbstractSymbol type = classTable.getObjectType(name);
+            if (type == null) {
+                classTable.semantError().println("Undeclared identifier " + name);
+                set_type(TreeConstants.Object_);
+            } else {
+                set_type(type);
+            }
+        }
+    }
 }
