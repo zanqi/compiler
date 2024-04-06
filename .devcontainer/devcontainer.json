@@ -6,7 +6,6 @@
 	"context": "..",
 	"dockerFile": "../Dockerfile",
 	"remoteEnv": {
-		// "PATH": "${containerEnv:PATH}:/usr/class/cs143/cool/bin"
 		"PATH": "${containerEnv:PATH}:/workspaces/compiler/bin",
 		"LC_ALL": "C"
 	},
@@ -22,19 +21,17 @@
 			}
 		}
 	},
+	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {},
 		"ghcr.io/devcontainers/features/git:1": {}
 	},
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "ln -s /workspaces/compiler /usr/class/cs143/cool",
+	"postCreateCommand": "mkdir -p /usr/class/cs143 && ln -s /workspaces/compiler /usr/class/cs143/cool",
 
 	// Configure tool-specific properties.
 	// "customizations": 
