@@ -248,7 +248,7 @@ class ClassTable {
                 Feature feature = (Feature) features.getNth(j);
                 if (feature instanceof attr) {
                     attr a = (attr) feature;
-                    // a.init.typeCheck(this.classTable, c.getName());
+                    a.init.typeCheck(this, c);
                 } else if (feature instanceof method) {
                     method m = (method) feature;
                     this.objectTable.enterScope();
