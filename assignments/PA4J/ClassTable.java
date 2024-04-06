@@ -16,6 +16,7 @@ class ClassTable {
     private SymbolTable objectTable;
     // method table is a map from class name to a map from method name to method
     private SymbolTable methodTable;
+    private class_c[] basicClasses;
 
     /**
      * Creates data structures representing basic Cool classes (Object,
@@ -178,6 +179,8 @@ class ClassTable {
         this.classTable.addId(TreeConstants.Int, Int_class);
         this.classTable.addId(TreeConstants.Bool, Bool_class);
         this.classTable.addId(TreeConstants.Str, Str_class);
+        this.classTable.addId(TreeConstants.prim_slot, new class_c(0, TreeConstants.prim_slot, TreeConstants.Object_, new Features(0), filename));
+        this.basicClasses = new class_c[] { Object_class, IO_class, Int_class, Bool_class, Str_class };
     }
 
     public ClassTable(Classes cls) {
@@ -203,8 +206,6 @@ class ClassTable {
             }
         }
 
-        // Check for inheritance errors
-
         // Check for cycles in the inheritance graph
         for (int i = 0; i < cls.getLength(); i++) {
             class_c c = (class_c) cls.getNth(i);
@@ -223,10 +224,17 @@ class ClassTable {
             }
         }
 
-        // For each class, traverse the AST, gather all visible declarations in a symbol
-        // table
-        for (int i = 0; i < cls.getLength(); i++) {
-            class_c c = (class_c) cls.getNth(i);
+        // For each class, traverse the AST, gather all visible declarations in objects
+        // and methods tables
+
+        // append basic classes to the class list
+        Classes cls2 = (Classes) cls.copy();
+        for (int i = 0; i < this.basicClasses.length; i++) {
+            cls2.appendElement(this.basicClasses[i]);
+        }
+
+        for (int i = 0; i < cls2.getLength(); i++) {
+            class_c c = (class_c) cls2.getNth(i);
             SymbolTable attrs = new SymbolTable();
             attrs.enterScope();
             SymbolTable methods = new SymbolTable();
@@ -242,6 +250,9 @@ class ClassTable {
                     }
 
                     class_c attrClass = (class_c) this.classTable.lookup(a.type_decl);
+                    if (Flags.semant_debug) {
+                        System.err.println("c.name: " + c.name + " a.name: " + a.name + " a.type_decl: " + a.type_decl + " attrClass: " + attrClass);
+                    }
                     attrs.addId(a.name, attrClass);
                 } else if (feature instanceof method) {
                     method m = (method) feature;
@@ -250,29 +261,6 @@ class ClassTable {
             }
             this.objectTable.addId(c.getName(), attrs);
             this.methodTable.addId(c.getName(), methods);
-
-            // Check each expression for type correctness
-            // for (int j = 0; j < features.getLength(); j++) {
-            //     Feature feature = (Feature) features.getNth(j);
-            //     if (feature instanceof attr) {
-            //         attr a = (attr) feature;
-            //         a.init.typeCheck(this, c);
-            //     } else if (feature instanceof method) {
-            //         method m = (method) feature;
-            //         this.objectTable.enterScope();
-            //         for (int k = 0; k < m.formals.getLength(); k++) {
-            //             formalc formal = (formalc) m.formals.getNth(k);
-            //             if (Flags.semant_debug) {
-            //                 System.err.println("Adding formal " + formal.name + ":" + formal.type_decl);
-            //             }
-            //             class_c formalClass = (class_c) this.objectTable.lookup(formal.type_decl);
-            //             this.objectTable.addId(formal.name, formalClass);
-            //         }
-            //         m.expr.typeCheck(this, c);
-            //         this.objectTable.exitScope();
-            //     }
-            // }
-            // this.objectTable.exitScope();
         }
 
         // Check each expression for type correctness
@@ -333,17 +321,19 @@ class ClassTable {
         return null;
     }
 
-
     public AbstractSymbol getObjectType(AbstractSymbol name, class_c c) {
-        SymbolTable attrs = (SymbolTable) this.objectTable.lookup(c.name);
-        if (Flags.semant_debug) {
-            System.err.println("Looking up object type for " + name + ": " + attrs.lookup(name));
+        while (c != null) {
+            SymbolTable attrs = (SymbolTable) this.objectTable.lookup(c.name);
+            if (Flags.semant_debug) {
+                System.err.println("Looking up object type for " + name + ": " + attrs.lookup(name));
+            }
+            class_c t = (class_c) (attrs.lookup(name));
+            if (t != null) {
+                return t.getName();
+            }
+            c = (class_c) this.classTable.lookup(c.getParent());
         }
-        class_c t = (class_c) (attrs.lookup(name));
-        if (t == null) {
-            return null;
-        }
-        return t.getName();
+        return null;
     }
 
     public boolean isSubtype(AbstractSymbol child, AbstractSymbol parent) {
