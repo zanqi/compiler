@@ -625,7 +625,7 @@ class assign extends Expression {
     @Override
     public void typeCheck(ClassTable classTable, class_c c) {
         expr.typeCheck(classTable, c);
-        AbstractSymbol type = classTable.getObjectType(name);
+        AbstractSymbol type = classTable.getObjectType(name, c);
         if (type == null) {
             classTable.semantError(c, this).println("Assignment to undeclared variable " + name);
             set_type(TreeConstants.Object_);
@@ -654,9 +654,9 @@ class static_dispatch extends Expression {
      *
      * @param lineNumber the line in the source file from which this node came.
      * @param a0         initial value for expr
-     * @param a1         initial value for type_name
-     * @param a2         initial value for name
-     * @param a3         initial value for actual
+     * @param a1         initial value for type_name, @a1
+     * @param a2         initial value for method name
+     * @param a3         initial value for method params
      */
     public static_dispatch(int lineNumber, Expression a1, AbstractSymbol a2, AbstractSymbol a3, Expressions a4) {
         super(lineNumber);
@@ -696,6 +696,13 @@ class static_dispatch extends Expression {
     @Override
     public void typeCheck(ClassTable classTable, class_c c) {
         expr.typeCheck(classTable, c);
+        // check if the type of the expression conforms to the declared type
+        if (!classTable.isSubtype(expr.get_type(), type_name)) {
+            classTable.semantError(c, this).println("Expression type " + expr.get_type()
+                    + " does not conform to declared static dispatch type " + type_name + ".");
+            set_type(TreeConstants.Object_);
+            return;
+        }
         // check if the method is defined in the class
         method m = classTable.getMethod(type_name, name);
         if (m == null) {
@@ -1866,9 +1873,9 @@ class object extends Expression {
         if (name.equals(TreeConstants.self)) {
             set_type(TreeConstants.SELF_TYPE);
         } else {
-            AbstractSymbol type = classTable.getObjectType(name);
+            AbstractSymbol type = classTable.getObjectType(name, c);
             if (type == null) {
-                classTable.semantError(c, this).println("Undeclared identifier " + name);
+                classTable.semantError(c, this).println("Undeclared identifier " + name + ".");
                 set_type(TreeConstants.Object_);
             } else {
                 set_type(type);
