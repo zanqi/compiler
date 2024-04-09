@@ -206,9 +206,29 @@ class ClassTable {
             }
         }
 
+        if (this.classTable.lookup(TreeConstants.Main) == null) {
+            this.semantError().println("Class Main is not defined.");
+        }
+
+        // Check illegal inheritance
+        for (int i = 0; i < cls.getLength(); i++) {
+            class_c c = (class_c) cls.getNth(i);
+            if (c.getParent() == TreeConstants.Int || c.getParent() == TreeConstants.Bool
+                    || c.getParent() == TreeConstants.Str || c.getParent() == TreeConstants.SELF_TYPE) {
+                this.semantError(c).println("Class " + c.getName() + " cannot inherit from " + c.getParent() + ".");
+            } else if (c.getName() == TreeConstants.SELF_TYPE) {
+                this.semantError(c).println("Class " + c.getName() + " cannot be redefined.");
+            } else if (c.getName() == TreeConstants.No_class) {
+                this.semantError(c).println("Class " + c.getName() + " cannot be redefined.");
+            } else if (this.classTable.lookup(c.getParent()) == null) {
+                this.semantError(c).println("Class " + c.getName() + " inherits from an undefined class " + c.getParent() + ".");
+            }
+        }
+
         // Check for cycles in the inheritance graph
         for (int i = 0; i < cls.getLength(); i++) {
             class_c c = (class_c) cls.getNth(i);
+            
             if (c.getName() != TreeConstants.Object_) {
                 AbstractSymbol parent = c.getParent();
                 while (parent != null && parent != TreeConstants.No_class) {
@@ -219,6 +239,9 @@ class ClassTable {
                         break;
                     }
                     class_c parentClass = (class_c) this.classTable.lookup(parent);
+                    if (parentClass == null) {
+                        break;
+                    }
                     parent = parentClass.getParent();
                 }
             }
@@ -239,7 +262,7 @@ class ClassTable {
             attrs.enterScope();
             SymbolTable methods = new SymbolTable();
             methods.enterScope();
-            attrs.addId(TreeConstants.self, new attr(0, TreeConstants.self, c.getName(), new no_expr(0)));
+            attrs.addId(TreeConstants.self, c.getName());
             Features features = c.features;
             for (int j = 0; j < features.getLength(); j++) {
                 Feature feature = (Feature) features.getNth(j);
@@ -249,11 +272,7 @@ class ClassTable {
                         this.semantError(c, a).println("'self' cannot be the name of an attribute.");
                     }
 
-                    class_c attrClass = (class_c) this.classTable.lookup(a.type_decl);
-                    if (Flags.semant_debug) {
-                        System.err.println("c.name: " + c.name + " a.name: " + a.name + " a.type_decl: " + a.type_decl + " attrClass: " + attrClass);
-                    }
-                    attrs.addId(a.name, attrClass);
+                    attrs.addId(a.name, a.type_decl);
                 } else if (feature instanceof method) {
                     method m = (method) feature;
                     methods.addId(m.name, m);
@@ -266,6 +285,8 @@ class ClassTable {
         // Check each expression for type correctness
         for (int i = 0; i < cls.getLength(); i++) {
             class_c c = (class_c) cls.getNth(i);
+            this.classTable.enterScope();
+            this.classTable.addId(TreeConstants.SELF_TYPE, c);
             Features features = c.features;
             for (int j = 0; j < features.getLength(); j++) {
                 Feature feature = (Feature) features.getNth(j);
@@ -293,13 +314,13 @@ class ClassTable {
                     attrs.enterScope();
                     for (int k = 0; k < m.formals.getLength(); k++) {
                         formalc formal = (formalc) m.formals.getNth(k);
-                        class_c formalClass = (class_c) this.classTable.lookup(formal.type_decl);
-                        attrs.addId(formal.name, formalClass);
+                        attrs.addId(formal.name, formal.type_decl);
                     }
                     m.expr.typeCheck(this, c);
                     attrs.exitScope();
                 }
             }
+            this.classTable.exitScope();
         }
     }
 
@@ -327,9 +348,9 @@ class ClassTable {
             if (Flags.semant_debug) {
                 System.err.println("Looking up object type for " + name + ": " + attrs.lookup(name));
             }
-            class_c t = (class_c) (attrs.lookup(name));
+            AbstractSymbol t = (AbstractSymbol) (attrs.lookup(name));
             if (t != null) {
-                return t.getName();
+                return t;
             }
             c = (class_c) this.classTable.lookup(c.getParent());
         }
@@ -368,16 +389,23 @@ class ClassTable {
         return null;
     }
 
-    public void enterScope() {
-        this.objectTable.enterScope();
+    public void enterScope(class_c c) {
+        SymbolTable obj = (SymbolTable) this.objectTable.lookup(c.getName());
+        obj.enterScope();
     }
 
-    public void exitScope() {
-        this.objectTable.exitScope();
+    public void exitScope(class_c c) {
+        SymbolTable obj = (SymbolTable) this.objectTable.lookup(c.getName());
+        obj.enterScope();
     }
 
-    public void addId(AbstractSymbol name, Object value) {
-        this.objectTable.addId(name, value);
+    public void addId(class_c c, AbstractSymbol name, Object value) {
+        if (Flags.semant_debug) {
+            System.err.println("Adding " + name + " to " + c.getName());
+        }
+
+        SymbolTable obj = (SymbolTable) this.objectTable.lookup(c.getName());
+        obj.addId(name, value);
     }
 
     /**

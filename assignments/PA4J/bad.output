@@ -1,0 +1,5 @@
+Dispatching to method init on object of type C
+Checking parameter Int against 0th formal type Int
+Checking parameter Int against 1th formal type Bool
+Dispatching to method init on object of type C
+Dispatching to method iinit on object of type C

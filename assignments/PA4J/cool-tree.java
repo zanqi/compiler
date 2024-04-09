@@ -632,7 +632,11 @@ class assign extends Expression {
         } else if (!classTable.isSubtype(expr.get_type(), type)) {
             classTable.semantError(c, this).println("Type " + expr.get_type() + " of assigned expression does not conform to declared type " + type + " of identifier " + name + ".");
             set_type(TreeConstants.Object_);
-        } else {
+        } else if (name.equals(TreeConstants.self)) {
+            classTable.semantError(c, this).println("Cannot assign to self.");
+            set_type(TreeConstants.Object_);
+        }
+        else {
             set_type(type);
         }
     }
@@ -702,6 +706,9 @@ class static_dispatch extends Expression {
                     + " does not conform to declared static dispatch type " + type_name + ".");
             set_type(TreeConstants.Object_);
             return;
+        }
+        if (Flags.semant_debug) {
+            System.out.println("Dispatching to method " + name + " on type " + type_name);
         }
         // check if the method is defined in the class
         method m = classTable.getMethod(type_name, name);
@@ -790,6 +797,9 @@ class dispatch extends Expression {
     public void typeCheck(ClassTable classTable, class_c c) {
         expr.typeCheck(classTable, c);
         // check if the method is defined in the class
+        if (Flags.semant_debug) {
+            System.out.println("Dispatching to method " + name + " on object of type " + expr.get_type());
+        }
         method m = classTable.getMethod(expr.get_type(), name);
         if (m == null) {
             classTable.semantError(c, this).println("Dispatch to undefined method " + name + ".");
@@ -804,6 +814,10 @@ class dispatch extends Expression {
             for (int i = 0; i < actual.getLength(); i++) {
                 Expression e = (Expression) actual.getNth(i);
                 e.typeCheck(classTable, c);
+                if (Flags.semant_debug) {
+                    System.out.println("Checking parameter " + e.get_type() + " against " + i + "th formal type "
+                            + ((formalc) m.formals.getNth(i)).type_decl);
+                }
                 formalc formal = (formalc) m.formals.getNth(i);
                 if (!classTable.isSubtype(e.get_type(), formal.type_decl)) {
                     classTable.semantError(c, this).println("In call of method " + name + ", type " + e.get_type()
@@ -984,10 +998,10 @@ class typcase extends Expression {
         AbstractSymbol type = null;
         for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
             branch b = (branch) e.nextElement();
-            classTable.enterScope();
-            classTable.addId(b.name, b.type_decl);
+            classTable.enterScope(c);
+            classTable.addId(c, b.name, b.type_decl);
             b.expr.typeCheck(classTable, c);
-            classTable.exitScope();
+            classTable.exitScope(c);
             if (type == null) {
                 type = b.expr.get_type();
             } else {
@@ -1100,11 +1114,22 @@ class let extends Expression {
 
     @Override
     public void typeCheck(ClassTable classTable, class_c c) {
-        classTable.enterScope();
-        classTable.addId(identifier, type_decl);
+        if (identifier.equals(TreeConstants.self)) {
+            classTable.semantError(c, this).println("Cannot bind self in a let expression.");
+            set_type(TreeConstants.Object_);
+            return;
+        }
         init.typeCheck(classTable, c);
+        if (!classTable.isSubtype(init.get_type(), type_decl)) {
+            classTable.semantError(c, this).println("Type " + init.get_type() + " of initialization expression does not conform to declared type " + type_decl + " of identifier " + identifier + ".");
+            set_type(TreeConstants.Object_);
+            return;
+        }
+
+        classTable.enterScope(c);
+        classTable.addId(c, identifier, type_decl);
         body.typeCheck(classTable, c);
-        classTable.exitScope();
+        classTable.exitScope(c);
         set_type(body.get_type());
     }
 }
