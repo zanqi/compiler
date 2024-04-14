@@ -7,6 +7,8 @@
 //////////////////////////////////////////////////////////
 
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.io.PrintStream;
 import java.util.Vector;
 
@@ -996,10 +998,15 @@ class typcase extends Expression {
     public void typeCheck(ClassTable classTable, class_c c) {
         expr.typeCheck(classTable, c);
         AbstractSymbol type = null;
+        Set<AbstractSymbol> types = new HashSet<>();
         for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
             branch b = (branch) e.nextElement();
             classTable.enterScope(c);
             classTable.addId(c, b.name, b.type_decl);
+            if (types.contains(b.type_decl)) {
+                classTable.semantError(c, this).println("Duplicate branch " + b.type_decl + " in case statement.");
+            }
+            types.add(b.type_decl);
             b.expr.typeCheck(classTable, c);
             classTable.exitScope(c);
             if (type == null) {
