@@ -262,7 +262,10 @@ class ClassTable {
             attrs.enterScope();
             SymbolTable methods = new SymbolTable();
             methods.enterScope();
+            this.classTable.enterScope();
+
             attrs.addId(TreeConstants.self, c.getName());
+            this.classTable.addId(TreeConstants.SELF_TYPE, c);
             Features features = c.features;
             for (int j = 0; j < features.getLength(); j++) {
                 Feature feature = (Feature) features.getNth(j);
@@ -280,6 +283,7 @@ class ClassTable {
             }
             this.objectTable.addId(c.getName(), attrs);
             this.methodTable.addId(c.getName(), methods);
+            this.classTable.exitScope();
         }
 
         // Check each expression for type correctness
@@ -310,14 +314,15 @@ class ClassTable {
                     a.init.typeCheck(this, c);
                 } else if (feature instanceof method) {
                     method m = (method) feature;
-                    SymbolTable attrs = (SymbolTable) this.objectTable.lookup(c.getName());
-                    attrs.enterScope();
-                    for (int k = 0; k < m.formals.getLength(); k++) {
-                        formalc formal = (formalc) m.formals.getNth(k);
-                        attrs.addId(formal.name, formal.type_decl);
-                    }
-                    m.expr.typeCheck(this, c);
-                    attrs.exitScope();
+                    m.typeCheck(this, c);
+                    // SymbolTable attrs = (SymbolTable) this.objectTable.lookup(c.getName());
+                    // attrs.enterScope();
+                    // for (int k = 0; k < m.formals.getLength(); k++) {
+                    //     formalc formal = (formalc) m.formals.getNth(k);
+                    //     attrs.addId(formal.name, formal.type_decl);
+                    // }
+                    // m.expr.typeCheck(this, c);
+                    // attrs.exitScope();
                 }
             }
             this.classTable.exitScope();
@@ -360,9 +365,6 @@ class ClassTable {
     public boolean isSubtype(AbstractSymbol child, AbstractSymbol parent) {
         if (child == parent) {
             return true;
-        }
-        if (child == TreeConstants.SELF_TYPE) {
-            return false;
         }
         class_c c = (class_c) this.classTable.lookup(child);
         while (c != null) {

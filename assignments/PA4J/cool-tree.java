@@ -447,6 +447,24 @@ class method extends Feature {
         expr.dump_with_types(out, n + 2);
     }
 
+    public void typeCheck(ClassTable classTable, class_c c) {
+        classTable.enterScope(c);
+        Set<AbstractSymbol> formalsSet = new HashSet<>();
+        for (Enumeration e = formals.getElements(); e.hasMoreElements();) {
+            formalc f = (formalc) e.nextElement();
+            if (formalsSet.contains(f.name)) {
+                classTable.semantError(c, this).println("Formal parameter " + f.name + " is multiply defined.");
+            }
+            formalsSet.add(f.name);
+            classTable.addId(c, f.name, f.type_decl);
+        }
+        expr.typeCheck(classTable, c);
+        classTable.exitScope(c);
+        if (!classTable.isSubtype(expr.get_type(), return_type)) {
+            classTable.semantError(c, this).println("Inferred return type " + expr.get_type()
+                    + " of method does not conform to declared return type " + return_type + ".");
+        }
+    }
 }
 
 /**
@@ -632,13 +650,14 @@ class assign extends Expression {
             classTable.semantError(c, this).println("Assignment to undeclared variable " + name);
             set_type(TreeConstants.Object_);
         } else if (!classTable.isSubtype(expr.get_type(), type)) {
-            classTable.semantError(c, this).println("Type " + expr.get_type() + " of assigned expression does not conform to declared type " + type + " of identifier " + name + ".");
+            classTable.semantError(c, this)
+                    .println("Type " + expr.get_type() + " of assigned expression does not conform to declared type "
+                            + type + " of identifier " + name + ".");
             set_type(TreeConstants.Object_);
         } else if (name.equals(TreeConstants.self)) {
             classTable.semantError(c, this).println("Cannot assign to self.");
             set_type(TreeConstants.Object_);
-        }
-        else {
+        } else {
             set_type(type);
         }
     }
@@ -891,7 +910,8 @@ class cond extends Expression {
         then_exp.typeCheck(classTable, c);
         else_exp.typeCheck(classTable, c);
         if (!pred.get_type().equals(TreeConstants.Bool)) {
-            classTable.semantError(c, this).println("Predicate of if statement is not of type Bool: " + pred.get_type());
+            classTable.semantError(c, this)
+                    .println("Predicate of if statement is not of type Bool: " + pred.get_type());
             set_type(TreeConstants.Object_);
         } else {
             set_type(classTable.getLCA(then_exp.get_type(), else_exp.get_type()));
@@ -1126,11 +1146,16 @@ class let extends Expression {
             set_type(TreeConstants.Object_);
             return;
         }
-        init.typeCheck(classTable, c);
-        if (!classTable.isSubtype(init.get_type(), type_decl)) {
-            classTable.semantError(c, this).println("Type " + init.get_type() + " of initialization expression does not conform to declared type " + type_decl + " of identifier " + identifier + ".");
-            set_type(TreeConstants.Object_);
-            return;
+        if (!(init instanceof no_expr)) {
+            init.typeCheck(classTable, c);
+            if (!classTable.isSubtype(init.get_type(), type_decl)) {
+                classTable.semantError(c, this)
+                        .println("Type " + init.get_type()
+                                + " of initialization expression does not conform to declared type " + type_decl
+                                + " of identifier " + identifier + ".");
+                set_type(TreeConstants.Object_);
+                return;
+            }
         }
 
         classTable.enterScope(c);
