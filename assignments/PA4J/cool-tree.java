@@ -448,12 +448,40 @@ class method extends Feature {
     }
 
     public void typeCheck(ClassTable classTable, class_c c) {
+        // check if method overrides a method in a parent class
+        method m = classTable.getMethod(c.getParent(), name);
+        if (m != null) {
+            if (!m.return_type.equals(return_type)) {
+                classTable.semantError(c, this).println("In redefined method " + name
+                        + ", return type " + return_type + " is different from original return type " + m.return_type);
+            }
+            if (m.formals.getLength() != formals.getLength()) {
+                classTable.semantError(c, this).println("Incompatible number of formal parameters in redefined method "
+                        + name);
+            } else {
+                for (int i = 0; i < formals.getLength(); i++) {
+                    formalc f1 = (formalc) m.formals.getNth(i);
+                    formalc f2 = (formalc) formals.getNth(i);
+                    if (!f1.type_decl.equals(f2.type_decl)) {
+                        classTable.semantError(c, this).println("In redefined method " + name
+                                + ", parameter type " + f2.type_decl + " is different from original type " + f1.type_decl);
+                    }
+                }
+            }
+        }
+
         classTable.enterScope(c);
         Set<AbstractSymbol> formalsSet = new HashSet<>();
         for (Enumeration e = formals.getElements(); e.hasMoreElements();) {
             formalc f = (formalc) e.nextElement();
             if (formalsSet.contains(f.name)) {
                 classTable.semantError(c, this).println("Formal parameter " + f.name + " is multiply defined.");
+            }
+            if (f.name.equals(TreeConstants.self)) {
+                classTable.semantError(c, this).println("'self' cannot be the name of a formal parameter.");
+            }
+            if (f.type_decl.equals(TreeConstants.SELF_TYPE)) {
+                classTable.semantError(c, this).println("Formal parameter " + f.name + " cannot have type SELF_TYPE.");
             }
             formalsSet.add(f.name);
             classTable.addId(c, f.name, f.type_decl);

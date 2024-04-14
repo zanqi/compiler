@@ -315,14 +315,6 @@ class ClassTable {
                 } else if (feature instanceof method) {
                     method m = (method) feature;
                     m.typeCheck(this, c);
-                    // SymbolTable attrs = (SymbolTable) this.objectTable.lookup(c.getName());
-                    // attrs.enterScope();
-                    // for (int k = 0; k < m.formals.getLength(); k++) {
-                    //     formalc formal = (formalc) m.formals.getNth(k);
-                    //     attrs.addId(formal.name, formal.type_decl);
-                    // }
-                    // m.expr.typeCheck(this, c);
-                    // attrs.exitScope();
                 }
             }
             this.classTable.exitScope();
@@ -398,7 +390,7 @@ class ClassTable {
 
     public void exitScope(class_c c) {
         SymbolTable obj = (SymbolTable) this.objectTable.lookup(c.getName());
-        obj.enterScope();
+        obj.exitScope();
     }
 
     public void addId(class_c c, AbstractSymbol name, Object value) {
