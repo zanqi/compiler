@@ -1,7 +1,8 @@
 
 ASSN = 5J
 CLASS= cs143
-CLASSDIR= ../..
+# CLASSDIR= ../..
+CLASSDIR= /workspaces/compiler
 
 SRC= CgenClassTable.java CgenNode.java CgenSupport.java TreeConstants.java cool-tree.java IntSymbol.java StringSymbol.java BoolConst.java example.cl README
 CSRC = \
