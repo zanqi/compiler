@@ -171,7 +171,7 @@ class CgenClassTable extends SymbolTable {
         // inherited. prim_slot is a class known to the code generator.
 
         addId(TreeConstants.No_class,
-                new CgenNode(new class_(0,
+                new CgenNode(new class_c(0,
                         TreeConstants.No_class,
                         TreeConstants.No_class,
                         new Features(0),
@@ -179,7 +179,7 @@ class CgenClassTable extends SymbolTable {
                         CgenNode.Basic, this));
 
         addId(TreeConstants.SELF_TYPE,
-                new CgenNode(new class_(0,
+                new CgenNode(new class_c(0,
                         TreeConstants.SELF_TYPE,
                         TreeConstants.No_class,
                         new Features(0),
@@ -187,7 +187,7 @@ class CgenClassTable extends SymbolTable {
                         CgenNode.Basic, this));
 
         addId(TreeConstants.prim_slot,
-                new CgenNode(new class_(0,
+                new CgenNode(new class_c(0,
                         TreeConstants.prim_slot,
                         TreeConstants.No_class,
                         new Features(0),
@@ -200,7 +200,7 @@ class CgenClassTable extends SymbolTable {
         // of class name
         // copy() : SELF_TYPE returns a copy of the object
 
-        class_ Object_class = new class_(0,
+        class_c Object_class = new class_c(0,
                 TreeConstants.Object_,
                 TreeConstants.No_class,
                 new Features(0)
@@ -229,14 +229,14 @@ class CgenClassTable extends SymbolTable {
         // in_string() : Str reads a string from the input
         // in_int() : Int " an int " " "
 
-        class_ IO_class = new class_(0,
+        class_c IO_class = new class_c(0,
                 TreeConstants.IO,
                 TreeConstants.Object_,
                 new Features(0)
                         .appendElement(new method(0,
                                 TreeConstants.out_string,
                                 new Formals(0)
-                                        .appendElement(new formal(0,
+                                        .appendElement(new formalc(0,
                                                 TreeConstants.arg,
                                                 TreeConstants.Str)),
                                 TreeConstants.SELF_TYPE,
@@ -244,7 +244,7 @@ class CgenClassTable extends SymbolTable {
                         .appendElement(new method(0,
                                 TreeConstants.out_int,
                                 new Formals(0)
-                                        .appendElement(new formal(0,
+                                        .appendElement(new formalc(0,
                                                 TreeConstants.arg,
                                                 TreeConstants.Int)),
                                 TreeConstants.SELF_TYPE,
@@ -266,7 +266,7 @@ class CgenClassTable extends SymbolTable {
         // The Int class has no methods and only a single attribute, the
         // "val" for the integer.
 
-        class_ Int_class = new class_(0,
+        class_c Int_class = new class_c(0,
                 TreeConstants.Int,
                 TreeConstants.Object_,
                 new Features(0)
@@ -279,7 +279,7 @@ class CgenClassTable extends SymbolTable {
         installClass(new CgenNode(Int_class, CgenNode.Basic, this));
 
         // Bool also has only the "val" slot.
-        class_ Bool_class = new class_(0,
+        class_c Bool_class = new class_c(0,
                 TreeConstants.Bool,
                 TreeConstants.Object_,
                 new Features(0)
@@ -298,7 +298,7 @@ class CgenClassTable extends SymbolTable {
         // concat(arg: Str) : Str performs string concatenation
         // substr(arg: Int, arg2: Int): Str substring selection
 
-        class_ Str_class = new class_(0,
+        class_c Str_class = new class_c(0,
                 TreeConstants.Str,
                 TreeConstants.Object_,
                 new Features(0)
@@ -318,7 +318,7 @@ class CgenClassTable extends SymbolTable {
                         .appendElement(new method(0,
                                 TreeConstants.concat,
                                 new Formals(0)
-                                        .appendElement(new formal(0,
+                                        .appendElement(new formalc(0,
                                                 TreeConstants.arg,
                                                 TreeConstants.Str)),
                                 TreeConstants.Str,
@@ -326,10 +326,10 @@ class CgenClassTable extends SymbolTable {
                         .appendElement(new method(0,
                                 TreeConstants.substr,
                                 new Formals(0)
-                                        .appendElement(new formal(0,
+                                        .appendElement(new formalc(0,
                                                 TreeConstants.arg,
                                                 TreeConstants.Int))
-                                        .appendElement(new formal(0,
+                                        .appendElement(new formalc(0,
                                                 TreeConstants.arg2,
                                                 TreeConstants.Int)),
                                 TreeConstants.Str,

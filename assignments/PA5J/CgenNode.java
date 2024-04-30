@@ -25,7 +25,7 @@ import java.io.PrintStream;
 import java.util.Vector;
 import java.util.Enumeration;
 
-class CgenNode extends class_ {
+class CgenNode extends class_c {
     /** The parent of this node in the inheritance tree */
     private CgenNode parent;
 
