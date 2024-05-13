@@ -412,9 +412,18 @@ class CgenClassTable extends SymbolTable {
         codeConstants();
 
         // Add your code to emit
-        // - prototype objects
         // - class_nameTab
+        if (Flags.cgen_debug)
+            System.out.println("coding class name table");
+        codeClassNameTab();
+
+        // - class_objTab
+        if (Flags.cgen_debug)
+            System.out.println("coding class object table");
+        codeClassObjTab();
+
         // - dispatch tables
+        // - prototype objects
 
         if (Flags.cgen_debug)
             System.out.println("coding global text");
@@ -424,6 +433,22 @@ class CgenClassTable extends SymbolTable {
         // - object initializer
         // - the class methods
         // - etc...
+    }
+
+    private void codeClassObjTab() {
+        str.print(CgenSupport.CLASSOBJTAB + CgenSupport.LABEL);
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+        }
+    }
+
+    private void codeClassNameTab() {
+        str.print(CgenSupport.CLASSNAMETAB + CgenSupport.LABEL);
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            // todo: use string constants
+            str.println(CgenSupport.WORD + nd.name);
+        }
     }
 
     /** Gets the root of the inheritance tree */

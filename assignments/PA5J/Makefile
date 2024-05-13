@@ -1,7 +1,6 @@
 
 ASSN = 5J
 CLASS= cs143
-# CLASSDIR= ../..
 CLASSDIR= /workspaces/compiler
 
 SRC= CgenClassTable.java CgenNode.java CgenSupport.java TreeConstants.java cool-tree.java IntSymbol.java StringSymbol.java BoolConst.java example.cl README
@@ -59,7 +58,7 @@ symtab-example: Makefile ${CLS}
 
 dotest:	cgen example.cl
 	@echo "\nRunning code generator on example.cl\n"
-	-./mycoolc example.cl
+	-./mycoolc -c example.cl
 
 ## cool-tree.class is not a real class file, but we need to have it
 ## for dependency tracking
