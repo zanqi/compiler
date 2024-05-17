@@ -38,6 +38,8 @@ class CgenClassTable extends SymbolTable {
     /** This is the stream to which assembly instructions are output */
     private PrintStream str;
 
+    private int objectclasstag;
+    private int ioclasstag;
     private int stringclasstag;
     private int intclasstag;
     private int boolclasstag;
@@ -377,9 +379,11 @@ class CgenClassTable extends SymbolTable {
 
         this.str = str;
 
-        stringclasstag = 4 /* Change to your String class tag here */;
+        objectclasstag = 0;
+        ioclasstag = 1;
         intclasstag = 2 /* Change to your Int class tag here */;
         boolclasstag = 3 /* Change to your Bool class tag here */;
+        stringclasstag = 4 /* Change to your String class tag here */;
 
         enterScope();
         if (Flags.cgen_debug)
@@ -428,6 +432,9 @@ class CgenClassTable extends SymbolTable {
         codeDispatchTables();
 
         // - prototype objects
+        if (Flags.cgen_debug)
+            System.out.println("coding prototype objects");
+        codePrototypes();
 
         if (Flags.cgen_debug)
             System.out.println("coding global text");
@@ -443,6 +450,7 @@ class CgenClassTable extends SymbolTable {
         str.print(CgenSupport.CLASSOBJTAB + CgenSupport.LABEL);
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
+            str.println(CgenSupport.WORD + nd.name + CgenSupport.PROTOBJ_SUFFIX);
         }
     }
 
@@ -461,6 +469,28 @@ class CgenClassTable extends SymbolTable {
             // todo: use string constants
             StringSymbol sym = (StringSymbol)AbstractTable.stringtable.lookup(nd.name.getString());
             str.println(CgenSupport.WORD + sym.refStr());
+        }
+    }
+
+    private void codePrototypes() {
+        int nextclasstag = 5;
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            int classtag = 0;
+            if (nd.name.equals(TreeConstants.Str)) {
+                classtag = stringclasstag;
+            } else if (nd.name.equals(TreeConstants.Int)) {
+                classtag = intclasstag;
+            } else if (nd.name.equals(TreeConstants.Bool)) {
+                classtag = boolclasstag;
+            } else if (nd.name.equals(TreeConstants.Object_)) {
+                classtag = objectclasstag;
+            } else if (nd.name.equals(TreeConstants.IO)) {
+                classtag = ioclasstag;
+            } else {
+                classtag = nextclasstag++;
+            }
+            nd.codeProtObj(str, classtag);
         }
     }
 
