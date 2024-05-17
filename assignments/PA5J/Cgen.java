@@ -30,35 +30,35 @@ class Cgen {
 
     /** Reads AST from from consosle, and outputs the assembly code */
     public static void main(String[] args) {
-	args = Flags.handleFlags(args);
-	try {
-	    ASTLexer lexer = new ASTLexer(new InputStreamReader(System.in));
-	    ASTParser parser = new ASTParser(lexer);
-	    Object result = parser.parse().value;
-	    
-	    PrintStream output = System.out;
-	    String filename = null;
-	    if (Flags.out_filename == null) {
-		if (Flags.in_filename != null) {
-		    filename = Flags.in_filename.substring(0, 
-							   Flags.in_filename.lastIndexOf('.'))
-			+ ".s";
-		}
-	    } else {
-		filename = Flags.out_filename;
-	    }
+    args = Flags.handleFlags(args);
+    try {
+        ASTLexer lexer = new ASTLexer(new InputStreamReader(System.in));
+        ASTParser parser = new ASTParser(lexer);
+        Object result = parser.parse().value;
+        
+        PrintStream output = System.out;
+        String filename = null;
+        if (Flags.out_filename == null) {
+        if (Flags.in_filename != null) {
+            filename = Flags.in_filename.substring(0, 
+                               Flags.in_filename.lastIndexOf('.'))
+            + ".s";
+        }
+        } else {
+        filename = Flags.out_filename;
+        }
 
-	    if (filename != null) {
-		try {
-		    output = new PrintStream(new FileOutputStream(filename));
-		} catch (IOException ex) {
-		    Utilities.fatalError("Cannot open output file " + filename);
-		}
-	    }
+        if (filename != null) {
+        try {
+            output = new PrintStream(new FileOutputStream(filename));
+        } catch (IOException ex) {
+            Utilities.fatalError("Cannot open output file " + filename);
+        }
+        }
 
-	    ((Program)result).cgen(output);
-	} catch (Exception ex) {
-	    ex.printStackTrace(System.err);
-	}
+        ((Program)result).cgen(output);
+    } catch (Exception ex) {
+        ex.printStackTrace(System.err);
+    }
     }
 }

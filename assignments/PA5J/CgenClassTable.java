@@ -377,9 +377,9 @@ class CgenClassTable extends SymbolTable {
 
         this.str = str;
 
-        stringclasstag = 0 /* Change to your String class tag here */;
-        intclasstag = 0 /* Change to your Int class tag here */;
-        boolclasstag = 0 /* Change to your Bool class tag here */;
+        stringclasstag = 4 /* Change to your String class tag here */;
+        intclasstag = 2 /* Change to your Int class tag here */;
+        boolclasstag = 3 /* Change to your Bool class tag here */;
 
         enterScope();
         if (Flags.cgen_debug)
@@ -423,6 +423,10 @@ class CgenClassTable extends SymbolTable {
         codeClassObjTab();
 
         // - dispatch tables
+        if (Flags.cgen_debug)
+            System.out.println("coding dispatch tables");
+        codeDispatchTables();
+
         // - prototype objects
 
         if (Flags.cgen_debug)
@@ -442,12 +446,21 @@ class CgenClassTable extends SymbolTable {
         }
     }
 
+    private void codeDispatchTables() {
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            str.print(nd.name + CgenSupport.DISPTAB_SUFFIX + CgenSupport.LABEL);
+            nd.codeDispatchTable(str);
+        }
+    }
+
     private void codeClassNameTab() {
         str.print(CgenSupport.CLASSNAMETAB + CgenSupport.LABEL);
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
             // todo: use string constants
-            str.println(CgenSupport.WORD + nd.name);
+            StringSymbol sym = (StringSymbol)AbstractTable.stringtable.lookup(nd.name.getString());
+            str.println(CgenSupport.WORD + sym.refStr());
         }
     }
 

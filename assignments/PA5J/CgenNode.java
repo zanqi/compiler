@@ -101,4 +101,17 @@ class CgenNode extends class_c {
     boolean basic() {
         return basic_status == Basic;
     }
+
+    void codeDispatchTable(PrintStream str) {
+        if (getParentNd() != null) {
+            getParentNd().codeDispatchTable(str);
+        }
+        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
+            Feature f = (Feature) e.nextElement();
+            if (f instanceof method) {
+                method m = (method) f;
+                str.println(CgenSupport.WORD + name.getString() + "." + m.name.getString());
+            }
+        }
+    }
 }
