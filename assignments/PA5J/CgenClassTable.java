@@ -442,7 +442,20 @@ class CgenClassTable extends SymbolTable {
 
         // Add your code to emit
         // - object initializer
+        if (Flags.cgen_debug)
+            System.out.println("coding object initializer");
+        codeObjectInitializer();
+
         // - the class methods
+        if (Flags.cgen_debug)
+            System.out.println("coding class methods");
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            if (nd.basic())
+                continue;
+            nd.codeMethods(str);
+        }
+
         // - etc...
     }
 
@@ -491,6 +504,13 @@ class CgenClassTable extends SymbolTable {
                 classtag = nextclasstag++;
             }
             nd.codeProtObj(str, classtag);
+        }
+    }
+
+    private void codeObjectInitializer() {
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            nd.codeObjInit(str);
         }
     }
 

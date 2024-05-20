@@ -135,18 +135,75 @@ class CgenNode extends class_c {
                 attr a = (attr) f;
                 if (a.type_decl.equals(TreeConstants.Int)) {
                     IntSymbol intSymbol = (IntSymbol) AbstractTable.inttable.addInt(0);
+                    s.print(CgenSupport.WORD);
                     intSymbol.codeRef(s);
                     s.println("");
                 } else if (a.type_decl.equals(TreeConstants.Str)) {
                     StringSymbol stringSymbol = (StringSymbol) AbstractTable.stringtable.addString("");
+                    s.print(CgenSupport.WORD);
                     stringSymbol.codeRef(s);
                     s.println("");
                 } else if (a.type_decl.equals(TreeConstants.Bool)) {
+                    s.print(CgenSupport.WORD);
                     BoolConst.falsebool.codeRef(s);
                     s.println("");
                 } else {
                     s.println(CgenSupport.WORD + "0");
                 }
+            }
+        }
+    }
+
+    void codeObjInit(PrintStream s) {
+        s.print(CgenSupport.objInitRef(name) + CgenSupport.LABEL);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);
+        CgenSupport.emitStore(CgenSupport.FP, 3, CgenSupport.SP, s);
+        CgenSupport.emitStore(CgenSupport.SELF, 2, CgenSupport.SP, s);
+        CgenSupport.emitStore(CgenSupport.RA, 1, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
+        CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
+        if (getParentNd() != null && !getParentNd().name.equals(TreeConstants.No_class)) {
+            s.println(CgenSupport.JAL + CgenSupport.objInitRef(getParentNd().name));
+        }
+        int offset = 0;
+        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
+            Feature f = (Feature) e.nextElement();
+            if (f instanceof attr) {
+                attr a = (attr) f;
+                if (a.init instanceof no_expr) {
+                    continue;
+                }
+                a.init.code(s);
+                CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
+            }
+        }
+        CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
+        CgenSupport.emitLoad(CgenSupport.FP, 3, CgenSupport.SP, s);
+        CgenSupport.emitLoad(CgenSupport.SELF, 2, CgenSupport.SP, s);
+        CgenSupport.emitLoad(CgenSupport.RA, 1, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 12, s);
+        CgenSupport.emitReturn(s);
+    }
+
+    void codeMethods(PrintStream s) {
+        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
+            Feature f = (Feature) e.nextElement();
+            if (f instanceof method) {
+                method m = (method) f;
+                s.print(CgenSupport.methodRef(name, m.name) + CgenSupport.LABEL);
+
+                CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);
+                CgenSupport.emitStore(CgenSupport.FP, 3, CgenSupport.SP, s);
+                CgenSupport.emitStore(CgenSupport.SELF, 2, CgenSupport.SP, s);
+                CgenSupport.emitStore(CgenSupport.RA, 1, CgenSupport.SP, s);
+                CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
+                CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
+                m.expr.code(s);
+                CgenSupport.emitLoad(CgenSupport.FP, 3, CgenSupport.SP, s);
+                CgenSupport.emitLoad(CgenSupport.SELF, 2, CgenSupport.SP, s);
+                CgenSupport.emitLoad(CgenSupport.RA, 1, CgenSupport.SP, s);
+                CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 12, s);
+                CgenSupport.emitReturn(s);
             }
         }
     }

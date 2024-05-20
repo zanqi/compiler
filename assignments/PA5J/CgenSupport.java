@@ -138,7 +138,7 @@ class CgenSupport {
      * */
     static void emitStore(String source_reg, int offset, String dest_reg, 
               PrintStream s) {
-    s.println(SW + source_reg + " " 
+        s.println(SW + source_reg + " " 
           + offset * WORD_SIZE 
           + "(" + dest_reg + ")");
     }
@@ -251,7 +251,7 @@ class CgenSupport {
      * */
     static void emitAddiu(String dest_reg, String src, int imm,
               PrintStream s) {
-    s.println(ADDIU + dest_reg + " " + src + " " + imm);
+        s.println(ADDIU + dest_reg + " " + src + " " + imm);
     }
 
     /** Emits a DIV instruction.
@@ -317,7 +317,7 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitReturn(PrintStream s) {
-    s.println(RET);
+        s.println(RET);
     }
 
     /** Emits a call to gc_assign.
@@ -497,7 +497,7 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitStoreInt(String source, String dest, PrintStream s) {
-    emitStore(source, DEFAULT_OBJFIELDS, dest, s);
+        emitStore(source, DEFAULT_OBJFIELDS, dest, s);
     }
     
     /** Emits code to manipulate garbage collector 
@@ -581,6 +581,14 @@ class CgenSupport {
         }
         byteMode(s);
         s.println("\t.byte\t0\t");
+    }
+
+    static String objInitRef(AbstractSymbol className) {
+        return className + CLASSINIT_SUFFIX;
+    }
+
+    static String methodRef(AbstractSymbol className, AbstractSymbol methodName) {
+        return className + METHOD_SEP + methodName;
     }
 }
     
