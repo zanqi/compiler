@@ -31,7 +31,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "mkdir -p /usr/class/cs143 && ln -s /workspaces/compiler /usr/class/cs143/cool",
+	"postCreateCommand": "mkdir -p /usr/class/cs143 && ln -s /workspaces/compiler /usr/class/cs143/cool && ln -s /workspaces/compiler/bin /usr/class/cs143/bin",
 
 	// Configure tool-specific properties.
 	// "customizations": 
