@@ -173,7 +173,7 @@ class CgenNode extends class_c {
                 if (a.init instanceof no_expr) {
                     continue;
                 }
-                a.init.code(s);
+                a.init.code(s, this);
                 CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
             }
         }
@@ -198,7 +198,7 @@ class CgenNode extends class_c {
                 CgenSupport.emitStore(CgenSupport.RA, 1, CgenSupport.SP, s);
                 CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
                 CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
-                m.expr.code(s);
+                m.expr.code(s, this);
                 CgenSupport.emitLoad(CgenSupport.FP, 3, CgenSupport.SP, s);
                 CgenSupport.emitLoad(CgenSupport.SELF, 2, CgenSupport.SP, s);
                 CgenSupport.emitLoad(CgenSupport.RA, 1, CgenSupport.SP, s);
@@ -206,5 +206,27 @@ class CgenNode extends class_c {
                 CgenSupport.emitReturn(s);
             }
         }
+    }
+
+    int getMethodOffset(String methodName) {
+        int offset = 0;
+        Vector<CgenNode> nodes = new Vector<CgenNode>();
+        for (CgenNode c = this; c != null; c = c.getParentNd()) {
+            nodes.add(c);
+        }
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            CgenNode c = nodes.get(i);
+            for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
+                Feature f = (Feature) e.nextElement();
+                if (f instanceof method) {
+                    method m = (method) f;
+                    if (m.name.getString().equals(methodName)) {
+                        return offset;
+                    }
+                    offset++;
+                }
+            }
+        }
+        return -1;
     }
 }

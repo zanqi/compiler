@@ -188,7 +188,7 @@ abstract class Expression extends TreeNode {
         }
     }
 
-    public abstract void code(PrintStream s);
+    public abstract void code(PrintStream s, CgenNode cgenNode);
 
 }
 
@@ -659,7 +659,7 @@ class assign extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -726,7 +726,7 @@ class static_dispatch extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -788,7 +788,24 @@ class dispatch extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
+        CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
+        CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, CgenSupport.labelIndex, s);
+        // load filename
+        StringSymbol filename = (StringSymbol) AbstractTable.stringtable.lookup(cgenNode.getFilename().toString());
+        CgenSupport.emitLoadString(CgenSupport.ACC, filename, s);
+        CgenSupport.emitLoadImm(CgenSupport.T1, lineNumber, s);
+        CgenSupport.emitJal(CgenSupport.DISPATCH_ABORT, s);
+
+        for (Enumeration e = actual.getElements(); e.hasMoreElements();) {
+            ((Expression) e.nextElement()).code(s, cgenNode);
+        }
+        expr.code(s, cgenNode);
+        CgenSupport.emitLabelDef(CgenSupport.labelIndex++, s);
+        // load dispatch table
+        CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
+        CgenSupport.emitLoad(CgenSupport.T1, cgenNode.getMethodOffset(name.getString()), CgenSupport.T1, s);
+        CgenSupport.emitJalr(CgenSupport.T1, s);
     }
 
 }
@@ -846,7 +863,7 @@ class cond extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -898,7 +915,7 @@ class loop extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -952,7 +969,7 @@ class typcase extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1001,7 +1018,10 @@ class block extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
+        for (Enumeration e = body.getElements(); e.hasMoreElements();) {
+            ((Expression) e.nextElement()).code(s, cgenNode);
+        }
     }
 
 }
@@ -1064,7 +1084,7 @@ class let extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1116,7 +1136,7 @@ class plus extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1168,7 +1188,7 @@ class sub extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1220,7 +1240,7 @@ class mul extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1272,7 +1292,7 @@ class divide extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1319,7 +1339,7 @@ class neg extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1371,7 +1391,7 @@ class lt extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1423,7 +1443,7 @@ class eq extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1475,7 +1495,7 @@ class leq extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1522,7 +1542,7 @@ class comp extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1568,7 +1588,7 @@ class int_const extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
         CgenSupport.emitLoadInt(CgenSupport.ACC,
                 (IntSymbol) AbstractTable.inttable.lookup(token.getString()), s);
     }
@@ -1616,7 +1636,7 @@ class bool_const extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
         CgenSupport.emitLoadBool(CgenSupport.ACC, new BoolConst(val), s);
     }
 
@@ -1665,7 +1685,7 @@ class string_const extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
         CgenSupport.emitLoadString(CgenSupport.ACC,
                 (StringSymbol) AbstractTable.stringtable.lookup(token.getString()), s);
     }
@@ -1714,7 +1734,7 @@ class new_ extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1761,7 +1781,7 @@ class isvoid extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1802,7 +1822,7 @@ class no_expr extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }
@@ -1849,7 +1869,7 @@ class object extends Expression {
      * 
      * @param s the output stream
      */
-    public void code(PrintStream s) {
+    public void code(PrintStream s, CgenNode cgenNode) {
     }
 
 }

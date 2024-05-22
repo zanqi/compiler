@@ -117,6 +117,9 @@ class CgenSupport {
     final static String BLT     = "\tblt\t";
     final static String BGT     = "\tbgt\t";
 
+    final static String DISPATCH_ABORT = "_dispatch_abort";
+    static int labelIndex = 0;
+
     /** Emits an LW instruction.
      * @param dest_reg the destination register
      * @param offset the word offset from source register
@@ -375,8 +378,8 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitLabelDef(int label, PrintStream s) {
-    emitLabelRef(label, s);
-    s.println(":");
+        emitLabelRef(label, s);
+        s.println(":");
     }
 
     /** Emits a BEQZ instruction.
@@ -409,9 +412,9 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitBne(String src1, String src2, int label, PrintStream s) {
-    s.print(BNE + src1 + " " + src2 + " ");
-    emitLabelRef(label, s);
-    s.println("");
+        s.print(BNE + src1 + " " + src2 + " ");
+        emitLabelRef(label, s);
+        s.println("");
     }
     
     /** Emits a BLEQ instruction.
@@ -504,12 +507,12 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitTestCollector(PrintStream s) {
-    emitPush(ACC, s);
-    emitMove(ACC, SP, s);
-    emitMove(A1, ZERO, s);
-    s.println(JAL + gcCollectNames[Flags.cgen_Memmgr]);
-    emitAddiu(SP, SP, 4, s);
-    emitLoad(ACC, 0, SP, s);
+        emitPush(ACC, s);
+        emitMove(ACC, SP, s);
+        emitMove(A1, ZERO, s);
+        s.println(JAL + gcCollectNames[Flags.cgen_Memmgr]);
+        emitAddiu(SP, SP, 4, s);
+        emitLoad(ACC, 0, SP, s);
     }
 
     /** Emits code to check the garbage collector 

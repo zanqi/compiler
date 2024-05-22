@@ -25,7 +25,8 @@ done
 COOL_INST=$(cd `dirname $0` && pwd)/..
 
 # set environment for spim/xspim
-DEFAULT_TRAP_HANDLER=$COOL_INST/lib/trap.handler
+# DEFAULT_TRAP_HANDLER=$COOL_INST/lib/trap.handler
+DEFAULT_TRAP_HANDLER=/usr/class/cs143/cool/lib/trap.handler
 export DEFAULT_TRAP_HANDLER
 
 
@@ -58,8 +59,14 @@ if [ ${1:0:1} != "-" ]; then
         echo "$progname: $1: No such file or directory." >&2
         exit 1
     fi
-    set -- "$abspath" "${@:2}"
+    set -- "-file" "$abspath" "${@:2}"
 fi
+
+# if -trap_file is not set in argument, use the default
+if [ `echo "$@" | grep -c "\-trap_file"` -eq 0 ]; then
+    set -- "-trap_file" $DEFAULT_TRAP_HANDLER "$@"
+fi
+
 for ((i=1; i<=$#; i++))  
 do
     if [ "${!i}" == "-file" -o "${!i}" == "-execute" -o "${!i}" == "-trap_file" ]; then
