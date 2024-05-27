@@ -88,6 +88,7 @@ class CgenSupport {
     final static String SP  = "$sp";		// Stack pointer 
     final static String FP  = "$fp";		// Frame pointer 
     final static String RA  = "$ra";		// Return address 
+    final static String S1  = "$s1";		// Callee-saved
     
     // Opcodes
     final static String JALR = "\tjalr\t";
@@ -201,9 +202,9 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitLoadInt(String dest_reg, IntSymbol i, PrintStream s) {
-    emitPartialLoadAddress(dest_reg, s);
-    i.codeRef(s);
-    s.println("");
+        emitPartialLoadAddress(dest_reg, s);
+        i.codeRef(s);
+        s.println("");
     }
 
     /** Emits a MOVE instruction.
@@ -305,7 +306,7 @@ class CgenSupport {
      * @param s the output stream
      * */
     static void emitJalr(String dest_reg, PrintStream s) {
-    s.println(JALR + dest_reg);
+        s.println(JALR + "\t" + dest_reg);
     }
 
     /** Emits a JAL instruction.

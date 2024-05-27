@@ -139,6 +139,10 @@ abstract class ListNode extends TreeNode {
 	return elements.elements();
     }
 
+    public int size() {
+        return elements.size();
+    }
+
     /** Appends an element to the list.
      * 
      * <p>Note: each generated subclass of ListNode also has an

@@ -464,6 +464,7 @@ class CgenClassTable extends SymbolTable {
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
             str.println(CgenSupport.WORD + nd.name + CgenSupport.PROTOBJ_SUFFIX);
+            str.println(CgenSupport.WORD + nd.name + CgenSupport.CLASSINIT_SUFFIX);
         }
     }
 

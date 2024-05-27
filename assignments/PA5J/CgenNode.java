@@ -190,20 +190,7 @@ class CgenNode extends class_c {
             Feature f = (Feature) e.nextElement();
             if (f instanceof method) {
                 method m = (method) f;
-                s.print(CgenSupport.methodRef(name, m.name) + CgenSupport.LABEL);
-
-                CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);
-                CgenSupport.emitStore(CgenSupport.FP, 3, CgenSupport.SP, s);
-                CgenSupport.emitStore(CgenSupport.SELF, 2, CgenSupport.SP, s);
-                CgenSupport.emitStore(CgenSupport.RA, 1, CgenSupport.SP, s);
-                CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
-                CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
-                m.expr.code(s, this);
-                CgenSupport.emitLoad(CgenSupport.FP, 3, CgenSupport.SP, s);
-                CgenSupport.emitLoad(CgenSupport.SELF, 2, CgenSupport.SP, s);
-                CgenSupport.emitLoad(CgenSupport.RA, 1, CgenSupport.SP, s);
-                CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 12, s);
-                CgenSupport.emitReturn(s);
+                m.code(s, this);
             }
         }
     }
