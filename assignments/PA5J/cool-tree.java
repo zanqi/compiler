@@ -492,8 +492,8 @@ class method extends Feature {
         CgenSupport.emitMethodRef(cgenNode.getName(), name, s);
         s.print(CgenSupport.LABEL);
 
-        int numLocals = expr instanceof let ? 1 : 0;
-        int numStackFields = numLocals + CgenSupport.DEFAULT_OBJFIELDS;
+        // int numLocals = expr instanceof let ? 1 : 0;
+        int numStackFields = CgenSupport.DEFAULT_OBJFIELDS;
         int stackSize = numStackFields * CgenSupport.WORD_SIZE;
 
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -stackSize, s);
@@ -502,14 +502,14 @@ class method extends Feature {
         CgenSupport.emitStore(CgenSupport.RA, numStackFields-2, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
         CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
-        if (numLocals > 0) {
-            CgenSupport.emitStore(CgenSupport.S1, numLocals - 1, CgenSupport.FP, s);
-        }
+        // if (numLocals > 0) {
+        //     CgenSupport.emitStore(CgenSupport.S1, numLocals - 1, CgenSupport.FP, s);
+        // }
         expr.code(s, cgenNode, cgenTable);
 
-        if (numLocals > 0) {
-            CgenSupport.emitLoad(CgenSupport.S1, numLocals - 1, CgenSupport.FP, s);
-        }
+        // if (numLocals > 0) {
+        //     CgenSupport.emitLoad(CgenSupport.S1, numLocals - 1, CgenSupport.FP, s);
+        // }
         CgenSupport.emitLoad(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
         CgenSupport.emitLoad(CgenSupport.SELF, numStackFields-1, CgenSupport.SP, s);
         CgenSupport.emitLoad(CgenSupport.RA, numStackFields-2, CgenSupport.SP, s);
@@ -1138,14 +1138,23 @@ class let extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
+        cgenTable.enterScope();
+        cgenTable.addId(identifier, this);
+        CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
         if (init != null) {
             if (init instanceof int_const) {
                 int_const i = (int_const) init;
                 IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
-                CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
+                CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
             }
         }
+
         body.code(s, cgenNode, cgenTable);
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, CgenSupport.WORD_SIZE, s);
+        CgenSupport.emitLoad(CgenSupport.S1, 0, CgenSupport.SP, s);
+        cgenTable.exitScope();
     }
 
 }
@@ -1938,6 +1947,12 @@ class object extends Expression {
                 CgenSupport.ACC, 
                 f.total - f.index + CgenSupport.DEFAULT_OBJFIELDS - 1, 
                 CgenSupport.FP,
+                s);
+        }
+        else if (info instanceof let) {
+            CgenSupport.emitMove(
+                CgenSupport.ACC, 
+                CgenSupport.S1,
                 s);
         }
     }
