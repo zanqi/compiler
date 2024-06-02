@@ -453,7 +453,7 @@ class CgenClassTable extends SymbolTable {
             CgenNode nd = (CgenNode) e.nextElement();
             if (nd.basic())
                 continue;
-            nd.codeMethods(str);
+            nd.codeMethods(str, this);
         }
 
         // - etc...
@@ -480,7 +480,6 @@ class CgenClassTable extends SymbolTable {
         str.print(CgenSupport.CLASSNAMETAB + CgenSupport.LABEL);
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            // todo: use string constants
             StringSymbol sym = (StringSymbol)AbstractTable.stringtable.lookup(nd.name.getString());
             str.println(CgenSupport.WORD + sym.refStr());
         }
@@ -511,7 +510,7 @@ class CgenClassTable extends SymbolTable {
     private void codeObjectInitializer() {
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            nd.codeObjInit(str);
+            nd.codeObjInit(str, this);
         }
     }
 

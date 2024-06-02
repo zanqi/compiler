@@ -25,6 +25,6 @@ class IdTable extends AbstractTable {
      * @see IdSymbol
      * */
     protected AbstractSymbol getNewSymbol(String s, int len, int index) {
-	return new IdSymbol(s, len, index);
+	    return new IdSymbol(s, len, index);
     }
 }

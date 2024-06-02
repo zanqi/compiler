@@ -154,7 +154,7 @@ class CgenNode extends class_c {
         }
     }
 
-    void codeObjInit(PrintStream s) {
+    void codeObjInit(PrintStream s, CgenClassTable cgenTable) {
         s.print(CgenSupport.objInitRef(name) + CgenSupport.LABEL);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);
         CgenSupport.emitStore(CgenSupport.FP, 3, CgenSupport.SP, s);
@@ -173,7 +173,7 @@ class CgenNode extends class_c {
                 if (a.init instanceof no_expr) {
                     continue;
                 }
-                a.init.code(s, this);
+                a.init.code(s, this, cgenTable);
                 CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
             }
         }
@@ -185,12 +185,12 @@ class CgenNode extends class_c {
         CgenSupport.emitReturn(s);
     }
 
-    void codeMethods(PrintStream s) {
+    void codeMethods(PrintStream s, CgenClassTable cgenTable) {
         for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
             Feature f = (Feature) e.nextElement();
             if (f instanceof method) {
                 method m = (method) f;
-                m.code(s, this);
+                m.code(s, this, cgenTable);
             }
         }
     }

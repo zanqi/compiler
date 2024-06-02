@@ -129,9 +129,9 @@ class CgenSupport {
      * */
     static void emitLoad(String dest_reg, int offset, String source_reg, 
              PrintStream s) {
-    s.println(LW + dest_reg + " " 
-          + offset * WORD_SIZE 
-          + "(" + source_reg + ")");
+        s.println(LW + dest_reg + " " 
+              + offset * WORD_SIZE 
+              + "(" + source_reg + ")");
     }
 
     /** Emits an SW instruction.

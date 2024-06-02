@@ -28,12 +28,12 @@ class IdSymbol extends AbstractSymbol {
      * @see AbstractSymbol
      * */
     public IdSymbol(String str, int len, int index) {
-	super(str, len, index);
+        super(str, len, index);
     }
 
     /** Returns a copy of this symbol */
     public Object clone() {
-	return new IdSymbol(str, str.length(), index);
+        return new IdSymbol(str, str.length(), index);
     }
 }
 

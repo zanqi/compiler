@@ -35,14 +35,21 @@ class StringTable extends AbstractTable {
      * @param s the output stream
      * */
     public void codeStringTable(int stringclasstag, PrintStream s) {
-    StringSymbol sym = null;
-    for (int i = tbl.size() - 1; i >= 0; i--) {
-        try {
-            sym = (StringSymbol)tbl.elementAt(i);
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            Utilities.fatalError("Unexpected exception: " + ex);
+        StringSymbol sym = null;
+        for (int i = tbl.size() - 1; i >= 0; i--) {
+            try {
+                sym = (StringSymbol)tbl.elementAt(i);
+                // System.out.println(sym.str + " " + sym.index);
+                if (sym.equalSym(TreeConstants.No_class) || sym.equalSym(TreeConstants.SELF_TYPE) || sym.equalSym(TreeConstants.prim_slot)) {
+                    continue;
+                }
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                Utilities.fatalError("Unexpected exception: " + ex);
+            }
+            sym.codeDef(stringclasstag, s);
         }
-        sym.codeDef(stringclasstag, s);
-    }
+        // System.out.println(TreeConstants.No_class.str + " " + TreeConstants.No_class.index);
+        // System.out.println(TreeConstants.SELF_TYPE.str + " " + TreeConstants.SELF_TYPE.index);
+        // System.out.println(TreeConstants.prim_slot.str + " " + TreeConstants.prim_slot.index);
     }
 }

@@ -8,7 +8,6 @@ class Main inherits IO {
   };
   main() : Object {
     let x : Int <- 2 in {
-      f(x, x);
       f(x <- 3, x <- 4);
       out_int(x);
     }
