@@ -841,15 +841,17 @@ class dispatch extends Expression {
         }
 
         CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
-        CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, CgenSupport.labelIndex, s);
-        // load filename
+        int nonNullBr = CgenSupport.labelIndex++;
+        CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, nonNullBr, s);
+        // Null object
         StringSymbol filename = (StringSymbol) AbstractTable.stringtable.lookup(cgenNode.getFilename().toString());
         CgenSupport.emitLoadString(CgenSupport.ACC, filename, s);
         CgenSupport.emitLoadImm(CgenSupport.T1, lineNumber, s);
         CgenSupport.emitJal(CgenSupport.DISPATCH_ABORT, s);
 
         expr.code(s, cgenNode, cgenTable);
-        CgenSupport.emitLabelDef(CgenSupport.labelIndex++, s);
+
+        CgenSupport.emitLabelDef(nonNullBr, s);
         // load dispatch table
         CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
         CgenSupport.emitLoad(CgenSupport.T1, cgenNode.getMethodOffset(name.getString()), CgenSupport.T1, s);
@@ -912,6 +914,18 @@ class cond extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
+        int elsebr = CgenSupport.labelIndex++;
+        int endif = CgenSupport.labelIndex++;
+        pred.code(s, cgenNode, cgenTable);
+        CgenSupport.emitLoad(CgenSupport.T1, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.ACC, s);
+        CgenSupport.emitBeqz(CgenSupport.T1, elsebr, s);
+        then_exp.code(s, cgenNode, cgenTable);
+        CgenSupport.emitBranch(endif, s);
+
+        CgenSupport.emitLabelDef(elsebr, s);
+        else_exp.code(s, cgenNode, cgenTable);
+
+        CgenSupport.emitLabelDef(endif, s);
     }
 
 }
@@ -1847,6 +1861,19 @@ class isvoid extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
+        int endIsVoid = CgenSupport.labelIndex++;
+        e1.code(s, cgenNode, cgenTable);
+        CgenSupport.emitMove(
+            CgenSupport.T1, 
+            CgenSupport.ACC,
+            s);
+        CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.truebool.ref(), s);
+
+        CgenSupport.emitBeqz(CgenSupport.T1, endIsVoid, s);
+
+        CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.falsebool.ref(), s);
+
+        CgenSupport.emitLabelDef(endIsVoid, s);
     }
 
 }

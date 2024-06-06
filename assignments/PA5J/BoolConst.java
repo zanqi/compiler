@@ -49,7 +49,11 @@ class BoolConst {
      * @param s the output stream
      * */
     public void codeRef(PrintStream s) {
-	s.print(CgenSupport.BOOLCONST_PREFIX + (val ? "1" : "0"));
+	    s.print(ref());
+    }
+
+    public String ref() {
+        return CgenSupport.BOOLCONST_PREFIX + (val ? "1" : "0");
     }
 
     /** Generates code for the boolean constant definition.  This method
