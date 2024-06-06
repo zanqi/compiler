@@ -492,7 +492,6 @@ class method extends Feature {
         CgenSupport.emitMethodRef(cgenNode.getName(), name, s);
         s.print(CgenSupport.LABEL);
 
-        // int numLocals = expr instanceof let ? 1 : 0;
         int numStackFields = CgenSupport.DEFAULT_OBJFIELDS;
         int stackSize = numStackFields * CgenSupport.WORD_SIZE;
 
@@ -502,14 +501,9 @@ class method extends Feature {
         CgenSupport.emitStore(CgenSupport.RA, numStackFields-2, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
         CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
-        // if (numLocals > 0) {
-        //     CgenSupport.emitStore(CgenSupport.S1, numLocals - 1, CgenSupport.FP, s);
-        // }
+
         expr.code(s, cgenNode, cgenTable);
 
-        // if (numLocals > 0) {
-        //     CgenSupport.emitLoad(CgenSupport.S1, numLocals - 1, CgenSupport.FP, s);
-        // }
         CgenSupport.emitLoad(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
         CgenSupport.emitLoad(CgenSupport.SELF, numStackFields-1, CgenSupport.SP, s);
         CgenSupport.emitLoad(CgenSupport.RA, numStackFields-2, CgenSupport.SP, s);
@@ -706,8 +700,9 @@ class assign extends Expression {
         if (expr instanceof int_const) {
             int_const i = (int_const) expr;
             IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
-            CgenSupport.emitLoadInt(CgenSupport.S1, intAddr,s);
-            CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr,s);
+            // todo: lookup the variable
+            CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
+            CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
         }
     }
 
@@ -1953,6 +1948,14 @@ class object extends Expression {
             CgenSupport.emitMove(
                 CgenSupport.ACC, 
                 CgenSupport.S1,
+                s);
+        }
+        else if (info instanceof attr) {
+            int offset = cgenNode.getAttrOffset(name) + CgenSupport.DEFAULT_OBJFIELDS;
+            CgenSupport.emitLoad(
+                CgenSupport.ACC,
+                offset,
+                CgenSupport.SELF,
                 s);
         }
     }

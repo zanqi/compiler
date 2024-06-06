@@ -95,7 +95,7 @@ abstract class AbstractSymbol {
             ((AbstractSymbol)another).index == this.index;
     }
 
-    public boolean equalSym(AbstractSymbol another) {
+    public boolean equalString(AbstractSymbol another) {
         return another.str == this.str;
     }
 

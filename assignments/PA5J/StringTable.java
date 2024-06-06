@@ -40,7 +40,7 @@ class StringTable extends AbstractTable {
             try {
                 sym = (StringSymbol)tbl.elementAt(i);
                 // System.out.println(sym.str + " " + sym.index);
-                if (sym.equalSym(TreeConstants.No_class) || sym.equalSym(TreeConstants.SELF_TYPE) || sym.equalSym(TreeConstants.prim_slot)) {
+                if (sym.equalString(TreeConstants.No_class) || sym.equalString(TreeConstants.SELF_TYPE) || sym.equalString(TreeConstants.prim_slot)) {
                     continue;
                 }
             } catch (ArrayIndexOutOfBoundsException ex) {

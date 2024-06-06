@@ -186,6 +186,14 @@ class CgenNode extends class_c {
     }
 
     void codeMethods(PrintStream s, CgenClassTable cgenTable) {
+        cgenTable.enterScope();
+        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
+            Feature f = (Feature) e.nextElement();
+            if (f instanceof attr) {
+                attr a = (attr) f;
+                cgenTable.addId(a.name, a);
+            }
+        }
         for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
             Feature f = (Feature) e.nextElement();
             if (f instanceof method) {
@@ -193,6 +201,7 @@ class CgenNode extends class_c {
                 m.code(s, this, cgenTable);
             }
         }
+        cgenTable.exitScope();
     }
 
     int getMethodOffset(String methodName) {
@@ -208,6 +217,28 @@ class CgenNode extends class_c {
                 if (f instanceof method) {
                     method m = (method) f;
                     if (m.name.getString().equals(methodName)) {
+                        return offset;
+                    }
+                    offset++;
+                }
+            }
+        }
+        return -1;
+    }
+
+    int getAttrOffset(AbstractSymbol attrName) {
+        int offset = 0;
+        Vector<CgenNode> nodes = new Vector<CgenNode>();
+        for (CgenNode c = this; c != null; c = c.getParentNd()) {
+            nodes.add(c);
+        }
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            CgenNode c = nodes.get(i);
+            for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
+                Feature f = (Feature) e.nextElement();
+                if (f instanceof attr) {
+                    attr a = (attr) f;
+                    if (a.name.equalString(attrName)) {
                         return offset;
                     }
                     offset++;
