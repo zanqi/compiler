@@ -840,7 +840,13 @@ class dispatch extends Expression {
             CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
         }
 
-        CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
+        if (expr instanceof no_expr) {
+            CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
+        }
+        else {
+            expr.code(s, cgenNode, cgenTable);
+        }
+
         int nonNullBr = CgenSupport.labelIndex++;
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, nonNullBr, s);
         // Null object
@@ -849,7 +855,6 @@ class dispatch extends Expression {
         CgenSupport.emitLoadImm(CgenSupport.T1, lineNumber, s);
         CgenSupport.emitJal(CgenSupport.DISPATCH_ABORT, s);
 
-        expr.code(s, cgenNode, cgenTable);
 
         CgenSupport.emitLabelDef(nonNullBr, s);
         // load dispatch table
@@ -1151,7 +1156,25 @@ class let extends Expression {
         cgenTable.addId(identifier, this);
         CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
-        if (init != null) {
+        if (init instanceof no_expr) {
+            // look for default object to store in S1
+            String addr;
+            if (type_decl.equals(TreeConstants.Int)) {
+                IntSymbol sym = (IntSymbol) AbstractTable.inttable.lookup("0");
+                CgenSupport.emitLoadInt(CgenSupport.S1, sym, s);
+            }
+            else if (type_decl.equals(TreeConstants.Str)) {
+                StringSymbol sym = (StringSymbol) AbstractTable.stringtable.lookup("");
+                CgenSupport.emitLoadString(CgenSupport.S1, sym, s);
+            }
+            else if (type_decl.equals(TreeConstants.Bool)) {
+                CgenSupport.emitLoadBool(CgenSupport.S1, BoolConst.falsebool, s);
+            }
+            else {
+                CgenSupport.emitLoadImm(CgenSupport.S1, 0, s);
+            }
+        }
+        else {
             if (init instanceof int_const) {
                 int_const i = (int_const) init;
                 IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
@@ -1523,6 +1546,46 @@ class eq extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
+        int done = CgenSupport.labelIndex++;
+        e1.code(s, cgenNode, cgenTable);
+        CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
+        CgenSupport.emitMove(
+            CgenSupport.S1, 
+            CgenSupport.ACC,
+            s
+        );
+        
+        e2.code(s, cgenNode, cgenTable);
+        CgenSupport.emitMove(
+            CgenSupport.T2, 
+            CgenSupport.ACC,
+            s
+        );
+
+        CgenSupport.emitMove(
+            CgenSupport.T1, 
+            CgenSupport.S1,
+            s
+        );
+        
+        CgenSupport.emitLoadAddress(
+            CgenSupport.ACC,
+            BoolConst.truebool.ref(),
+            s
+        );
+        CgenSupport.emitBeq(CgenSupport.T1, CgenSupport.T2, done, s);
+
+        CgenSupport.emitLoadAddress(
+            CgenSupport.A1,
+            BoolConst.falsebool.ref(),
+            s
+        );
+        CgenSupport.emitJal(CgenSupport.EQUALITY_TEST, s);
+        CgenSupport.emitLabelDef(done, s);
+        CgenSupport.emitLoad(CgenSupport.S1, CgenSupport.WORD_SIZE, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, CgenSupport.WORD_SIZE, s);
+
     }
 
 }

@@ -119,6 +119,7 @@ class CgenSupport {
     final static String BGT     = "\tbgt\t";
 
     final static String DISPATCH_ABORT = "_dispatch_abort";
+    final static String EQUALITY_TEST = "equality_test";
     static int labelIndex = 0;
 
     /** Emits an LW instruction.

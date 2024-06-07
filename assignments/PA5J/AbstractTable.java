@@ -96,32 +96,33 @@ abstract class AbstractTable {
 
     /** Creates a new symbol of the appropriate type */
     protected abstract AbstractSymbol getNewSymbol(String s, 
-						   int len, int index);
+                           int len, int index);
 
     /** Adds prefix of the specified length to this string table
+     *  if s is not in the table
      *
      * @param s the string to add
      * @param maxchars the length of the prefix
      * @return the symbol for the string s
      * */
     public AbstractSymbol addString(String s, int maxchars) {
-	int len = Math.min(s.length(), maxchars);
-	AbstractSymbol sym = null;
-	for (int i = 0; i < tbl.size(); i++) {
-	    try {
-		sym = (AbstractSymbol)tbl.elementAt(i);
-	    } catch (ArrayIndexOutOfBoundsException ex) {
-		Utilities.fatalError("Unexpected exception: " + ex);
-	    }
-	    if (sym.equalString(s, len)) {
-		return sym;
-	    }
-	}
-	sym = getNewSymbol(s, len, tbl.size());
-	tbl.addElement(sym);
-	return sym;
+    int len = Math.min(s.length(), maxchars);
+    AbstractSymbol sym = null;
+    for (int i = 0; i < tbl.size(); i++) {
+        try {
+            sym = (AbstractSymbol)tbl.elementAt(i);
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            Utilities.fatalError("Unexpected exception: " + ex);
+        }
+        if (sym.equalString(s, len)) {
+            return sym;
+        }
     }
-		
+    sym = getNewSymbol(s, len, tbl.size());
+    tbl.addElement(sym);
+    return sym;
+    }
+        
 
     /** Adds the specified string to this string table
      *
@@ -129,7 +130,7 @@ abstract class AbstractTable {
      * @return the symbol for the string s
      * */
     public AbstractSymbol addString(String s) {
-	return addString(s, MAXSIZE);
+    return addString(s, MAXSIZE);
     }
 
     /** Adds the string representation of the specified integer to this
@@ -139,7 +140,7 @@ abstract class AbstractTable {
      * @return the symbol for the integer i
      * */
     public AbstractSymbol addInt(int i) {
-	return addString(Integer.toString(i), MAXSIZE);
+    return addString(Integer.toString(i), MAXSIZE);
     }
     
     /** Returns an enumeration of symbols in this string table
@@ -148,7 +149,7 @@ abstract class AbstractTable {
      * @see java.util.Enumeration
      * */
     public Enumeration getSymbols() {
-	return tbl.elements();
+    return tbl.elements();
     }
     
     /** Looks up a symbol in this string table by its index
@@ -159,15 +160,15 @@ abstract class AbstractTable {
      * @return a symbol corresponding to the index
      * */
     public AbstractSymbol lookup(int index) { 
-	AbstractSymbol sym = null;
-	try {
-	    sym = (AbstractSymbol)tbl.elementAt(index);
-	} catch (ArrayIndexOutOfBoundsException ex) {
-	    Utilities.fatalError("Symbol index out of bounds: " + index);
-	}
-	return sym;
+    AbstractSymbol sym = null;
+    try {
+        sym = (AbstractSymbol)tbl.elementAt(index);
+    } catch (ArrayIndexOutOfBoundsException ex) {
+        Utilities.fatalError("Symbol index out of bounds: " + index);
     }
-	    
+    return sym;
+    }
+        
 
     /** Looks up a symbol in this string table by its string representation
      * 
@@ -177,35 +178,35 @@ abstract class AbstractTable {
      * @return a symbol corresponding to the string
      * */
     public AbstractSymbol lookup(String s) {
-	int len = s.length();
-	AbstractSymbol sym = null;
-	for (int i = 0; i < tbl.size(); i++) {
-	    try {
-		sym = (AbstractSymbol)tbl.elementAt(i);
-	    } catch (ArrayIndexOutOfBoundsException ex) {
-		Utilities.fatalError("Unexpected exception: " + ex);
-	    }
-	    if (sym.equalString(s, len)) {
-		return sym;
-	    }
-	}
-	Utilities.fatalError("String table lookup failed on string: " + s);
-	return null;
+    int len = s.length();
+    AbstractSymbol sym = null;
+    for (int i = 0; i < tbl.size(); i++) {
+        try {
+        sym = (AbstractSymbol)tbl.elementAt(i);
+        } catch (ArrayIndexOutOfBoundsException ex) {
+        Utilities.fatalError("Unexpected exception: " + ex);
+        }
+        if (sym.equalString(s, len)) {
+        return sym;
+        }
+    }
+    Utilities.fatalError("String table lookup failed on string: " + s);
+    return null;
     }
 
     /** Produces a printable representation of the string table */
     public String toString() {
-	String res = "[\n";
-	AbstractSymbol sym = null;
-	for (int i = 0; i < tbl.size(); i++) {
-	    try {
-		sym = (AbstractSymbol)tbl.elementAt(i);
-	    } catch (ArrayIndexOutOfBoundsException ex) {
-		Utilities.fatalError("Unexpected exception: " + ex);
-	    }
-	    res += "  " + sym.toString() + "\n";
-	}
-	res += "]\n";
-	return res;
+    String res = "[\n";
+    AbstractSymbol sym = null;
+    for (int i = 0; i < tbl.size(); i++) {
+        try {
+        sym = (AbstractSymbol)tbl.elementAt(i);
+        } catch (ArrayIndexOutOfBoundsException ex) {
+        Utilities.fatalError("Unexpected exception: " + ex);
+        }
+        res += "  " + sym.toString() + "\n";
+    }
+    res += "]\n";
+    return res;
     }
 }
