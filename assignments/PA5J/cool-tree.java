@@ -840,12 +840,7 @@ class dispatch extends Expression {
             CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
         }
 
-        if (expr instanceof no_expr) {
-            CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
-        }
-        else {
-            expr.code(s, cgenNode, cgenTable);
-        }
+        expr.code(s, cgenNode, cgenTable);
 
         int nonNullBr = CgenSupport.labelIndex++;
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, nonNullBr, s);
@@ -2045,6 +2040,12 @@ class object extends Expression {
             CgenSupport.emitLoad(
                 CgenSupport.ACC,
                 offset,
+                CgenSupport.SELF,
+                s);
+        }
+        else if (name == TreeConstants.self) {
+            CgenSupport.emitMove(
+                CgenSupport.ACC, 
                 CgenSupport.SELF,
                 s);
         }
