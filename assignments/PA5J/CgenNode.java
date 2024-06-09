@@ -191,7 +191,7 @@ class CgenNode extends class_c {
             Feature f = (Feature) e.nextElement();
             if (f instanceof attr) {
                 attr a = (attr) f;
-                cgenTable.addId(a.name, a);
+                cgenTable.addId(a.name, new CgenAttr(a.name, this));
             }
         }
         for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
@@ -246,5 +246,88 @@ class CgenNode extends class_c {
             }
         }
         return -1;
+    }
+}
+
+abstract class CgenVar {
+    public abstract void emitStore(PrintStream s);
+    public abstract void emitLoad(PrintStream s);
+}
+
+class CgenTemp extends CgenVar {
+    int id;
+
+    public CgenTemp(int id) {
+        this.id = id;
+    }
+
+    public void emitStore(PrintStream s) {
+        CgenSupport.emitStore(
+                    CgenSupport.ACC,
+                    -id-1,
+                    CgenSupport.FP,
+                    s);
+    }
+
+    public void emitLoad(PrintStream s) {
+        CgenSupport.emitLoad(
+                    CgenSupport.ACC,
+                    -id-1,
+                    CgenSupport.FP,
+                    s);
+    }
+}
+
+class CgenFormal extends CgenVar {
+    int id;
+    int total;
+
+    public CgenFormal(int id, int total) {
+        this.id = id;
+        this.total = total;
+    }
+
+    public void emitStore(PrintStream s) {
+        CgenSupport.emitStore(
+                    CgenSupport.ACC,
+                    total - id - 1 + CgenSupport.DEFAULT_OBJFIELDS, 
+                    CgenSupport.FP,
+                    s);
+    }
+
+    public void emitLoad(PrintStream s) {
+        CgenSupport.emitLoad(
+                    CgenSupport.ACC,
+                    total - id - 1 + CgenSupport.DEFAULT_OBJFIELDS, 
+                    CgenSupport.FP,
+                    s);
+    }
+}
+
+class CgenAttr extends CgenVar {
+    AbstractSymbol name;
+    CgenNode node;
+
+    public CgenAttr(AbstractSymbol name, CgenNode node) {
+        this.name = name;
+        this.node = node;
+    }
+
+    public void emitStore(PrintStream s) {
+        int offset = node.getAttrOffset(name) + CgenSupport.DEFAULT_OBJFIELDS;
+        CgenSupport.emitStore(
+            CgenSupport.ACC,
+            offset,
+            CgenSupport.SELF,
+            s);
+    }
+
+    public void emitLoad(PrintStream s) {
+        int offset = node.getAttrOffset(name) + CgenSupport.DEFAULT_OBJFIELDS;
+        CgenSupport.emitLoad(
+            CgenSupport.ACC,
+            offset,
+            CgenSupport.SELF,
+            s);
     }
 }

@@ -484,9 +484,7 @@ class method extends Feature {
         int numParams = formals.size();
         for (Enumeration e = formals.getElements(); e.hasMoreElements(); i++) {
             formalc f = (formalc) e.nextElement();
-            f.index = i;
-            f.total = numParams;
-            cgenTable.addId(f.name, f);
+            cgenTable.addId(f.name, new CgenFormal(i, numParams));
         }
 
         CgenSupport.emitMethodRef(cgenNode.getName(), name, s);
@@ -703,6 +701,11 @@ class assign extends Expression {
             // todo: lookup the variable
             CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
             CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
+        }
+        else {
+            CgenVar var = (CgenVar) cgenTable.lookup(name);
+            expr.code(s, cgenNode, cgenTable);
+            var.emitStore(s);
         }
     }
 
@@ -1148,7 +1151,7 @@ class let extends Expression {
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
         cgenTable.enterScope();
-        cgenTable.addId(identifier, this);
+        cgenTable.addId(identifier, new CgenTemp(1));
         CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
         if (init instanceof no_expr) {
@@ -1234,6 +1237,22 @@ class plus extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
+        CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
+
+        e1.code(s, cgenNode, cgenTable);
+        CgenSupport.emitMove(CgenSupport.S1, CgenSupport.ACC, s);
+        e2.code(s, cgenNode, cgenTable);
+
+        CgenSupport.emitJal(CgenSupport.OBJECT_COPY, s);
+
+        CgenSupport.emitLoad(CgenSupport.T2, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.ACC, s);
+        CgenSupport.emitLoad(CgenSupport.T1, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.S1, s);
+        CgenSupport.emitAdd(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
+        CgenSupport.emitStore(CgenSupport.T1, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.ACC, s);
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, CgenSupport.WORD_SIZE, s);
+        CgenSupport.emitLoad(CgenSupport.S1, 0, CgenSupport.SP, s);
     }
 
 }
@@ -1578,8 +1597,8 @@ class eq extends Expression {
         );
         CgenSupport.emitJal(CgenSupport.EQUALITY_TEST, s);
         CgenSupport.emitLabelDef(done, s);
-        CgenSupport.emitLoad(CgenSupport.S1, CgenSupport.WORD_SIZE, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, CgenSupport.WORD_SIZE, s);
+        CgenSupport.emitLoad(CgenSupport.S1, 0, CgenSupport.SP, s);
 
     }
 
@@ -2020,35 +2039,14 @@ class object extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
-        Object info = cgenTable.lookup(name);
-        if (info instanceof formalc) {
-            formalc f = (formalc) info;
-            CgenSupport.emitLoad(
-                CgenSupport.ACC, 
-                f.total - f.index + CgenSupport.DEFAULT_OBJFIELDS - 1, 
-                CgenSupport.FP,
-                s);
-        }
-        else if (info instanceof let) {
-            CgenSupport.emitMove(
-                CgenSupport.ACC, 
-                CgenSupport.S1,
-                s);
-        }
-        else if (info instanceof attr) {
-            int offset = cgenNode.getAttrOffset(name) + CgenSupport.DEFAULT_OBJFIELDS;
-            CgenSupport.emitLoad(
-                CgenSupport.ACC,
-                offset,
-                CgenSupport.SELF,
-                s);
-        }
-        else if (name == TreeConstants.self) {
+        if (name == TreeConstants.self) {
             CgenSupport.emitMove(
                 CgenSupport.ACC, 
                 CgenSupport.SELF,
                 s);
+            return;
         }
+        CgenVar var = (CgenVar) cgenTable.lookup(name);
+        var.emitLoad(s);
     }
-
 }
