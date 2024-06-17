@@ -495,16 +495,16 @@ class method extends Feature {
 
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -stackSize, s);
         CgenSupport.emitStore(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
-        CgenSupport.emitStore(CgenSupport.SELF, numStackFields-1, CgenSupport.SP, s);
-        CgenSupport.emitStore(CgenSupport.RA, numStackFields-2, CgenSupport.SP, s);
+        CgenSupport.emitStore(CgenSupport.SELF, numStackFields - 1, CgenSupport.SP, s);
+        CgenSupport.emitStore(CgenSupport.RA, numStackFields - 2, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
         CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
 
         expr.code(s, cgenNode, cgenTable);
 
         CgenSupport.emitLoad(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
-        CgenSupport.emitLoad(CgenSupport.SELF, numStackFields-1, CgenSupport.SP, s);
-        CgenSupport.emitLoad(CgenSupport.RA, numStackFields-2, CgenSupport.SP, s);
+        CgenSupport.emitLoad(CgenSupport.SELF, numStackFields - 1, CgenSupport.SP, s);
+        CgenSupport.emitLoad(CgenSupport.RA, numStackFields - 2, CgenSupport.SP, s);
         stackSize = (numStackFields + numParams) * CgenSupport.WORD_SIZE;
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, stackSize, s);
         CgenSupport.emitReturn(s);
@@ -701,8 +701,7 @@ class assign extends Expression {
             // todo: lookup the variable
             CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
             CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
-        }
-        else {
+        } else {
             CgenVar var = (CgenVar) cgenTable.lookup(name);
             expr.code(s, cgenNode, cgenTable);
             var.emitStore(s);
@@ -852,7 +851,6 @@ class dispatch extends Expression {
         CgenSupport.emitLoadString(CgenSupport.ACC, filename, s);
         CgenSupport.emitLoadImm(CgenSupport.T1, lineNumber, s);
         CgenSupport.emitJal(CgenSupport.DISPATCH_ABORT, s);
-
 
         CgenSupport.emitLabelDef(nonNullBr, s);
         // load dispatch table
@@ -1160,19 +1158,15 @@ class let extends Expression {
             if (type_decl.equals(TreeConstants.Int)) {
                 IntSymbol sym = (IntSymbol) AbstractTable.inttable.lookup("0");
                 CgenSupport.emitLoadInt(CgenSupport.S1, sym, s);
-            }
-            else if (type_decl.equals(TreeConstants.Str)) {
+            } else if (type_decl.equals(TreeConstants.Str)) {
                 StringSymbol sym = (StringSymbol) AbstractTable.stringtable.lookup("");
                 CgenSupport.emitLoadString(CgenSupport.S1, sym, s);
-            }
-            else if (type_decl.equals(TreeConstants.Bool)) {
+            } else if (type_decl.equals(TreeConstants.Bool)) {
                 CgenSupport.emitLoadBool(CgenSupport.S1, BoolConst.falsebool, s);
-            }
-            else {
+            } else {
                 CgenSupport.emitLoadImm(CgenSupport.S1, 0, s);
             }
-        }
-        else {
+        } else {
             if (init instanceof int_const) {
                 int_const i = (int_const) init;
                 IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
@@ -1565,36 +1559,31 @@ class eq extends Expression {
         CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
         CgenSupport.emitMove(
-            CgenSupport.S1, 
-            CgenSupport.ACC,
-            s
-        );
-        
+                CgenSupport.S1,
+                CgenSupport.ACC,
+                s);
+
         e2.code(s, cgenNode, cgenTable);
         CgenSupport.emitMove(
-            CgenSupport.T2, 
-            CgenSupport.ACC,
-            s
-        );
+                CgenSupport.T2,
+                CgenSupport.ACC,
+                s);
 
         CgenSupport.emitMove(
-            CgenSupport.T1, 
-            CgenSupport.S1,
-            s
-        );
-        
+                CgenSupport.T1,
+                CgenSupport.S1,
+                s);
+
         CgenSupport.emitLoadAddress(
-            CgenSupport.ACC,
-            BoolConst.truebool.ref(),
-            s
-        );
+                CgenSupport.ACC,
+                BoolConst.truebool.ref(),
+                s);
         CgenSupport.emitBeq(CgenSupport.T1, CgenSupport.T2, done, s);
 
         CgenSupport.emitLoadAddress(
-            CgenSupport.A1,
-            BoolConst.falsebool.ref(),
-            s
-        );
+                CgenSupport.A1,
+                BoolConst.falsebool.ref(),
+                s);
         CgenSupport.emitJal(CgenSupport.EQUALITY_TEST, s);
         CgenSupport.emitLabelDef(done, s);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, CgenSupport.WORD_SIZE, s);
@@ -1941,9 +1930,9 @@ class isvoid extends Expression {
         int endIsVoid = CgenSupport.labelIndex++;
         e1.code(s, cgenNode, cgenTable);
         CgenSupport.emitMove(
-            CgenSupport.T1, 
-            CgenSupport.ACC,
-            s);
+                CgenSupport.T1,
+                CgenSupport.ACC,
+                s);
         CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.truebool.ref(), s);
 
         CgenSupport.emitBeqz(CgenSupport.T1, endIsVoid, s);
@@ -2041,9 +2030,9 @@ class object extends Expression {
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
         if (name == TreeConstants.self) {
             CgenSupport.emitMove(
-                CgenSupport.ACC, 
-                CgenSupport.SELF,
-                s);
+                    CgenSupport.ACC,
+                    CgenSupport.SELF,
+                    s);
             return;
         }
         CgenVar var = (CgenVar) cgenTable.lookup(name);
