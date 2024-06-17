@@ -695,17 +695,21 @@ class assign extends Expression {
      * @param s the output stream
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
-        if (expr instanceof int_const) {
-            int_const i = (int_const) expr;
-            IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
-            // todo: lookup the variable
-            CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
-            CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
-        } else {
-            CgenVar var = (CgenVar) cgenTable.lookup(name);
-            expr.code(s, cgenNode, cgenTable);
-            var.emitStore(s);
-        }
+        // if (expr instanceof int_const) {
+        //     int_const i = (int_const) expr;
+        //     IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
+        //     // todo: lookup the variable
+        //     CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
+        //     CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
+        // } else {
+        //     CgenVar var = (CgenVar) cgenTable.lookup(name);
+        //     expr.code(s, cgenNode, cgenTable);
+        //     var.emitStore(s);
+        // }
+
+        CgenVar var = (CgenVar) cgenTable.lookup(name);
+        expr.code(s, cgenNode, cgenTable);
+        var.emitStore(s);
     }
 
 }
@@ -1149,30 +1153,30 @@ class let extends Expression {
      */
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable) {
         cgenTable.enterScope();
-        cgenTable.addId(identifier, new CgenTemp(1));
-        CgenSupport.emitStore(CgenSupport.S1, 0, CgenSupport.SP, s);
-        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
+        CgenTemp t = new CgenTemp(0);
+        cgenTable.addId(identifier, t);
         if (init instanceof no_expr) {
             // look for default object to store in S1
-            String addr;
             if (type_decl.equals(TreeConstants.Int)) {
                 IntSymbol sym = (IntSymbol) AbstractTable.inttable.lookup("0");
-                CgenSupport.emitLoadInt(CgenSupport.S1, sym, s);
+                CgenSupport.emitLoadInt(CgenSupport.ACC, sym, s);
             } else if (type_decl.equals(TreeConstants.Str)) {
                 StringSymbol sym = (StringSymbol) AbstractTable.stringtable.lookup("");
-                CgenSupport.emitLoadString(CgenSupport.S1, sym, s);
+                CgenSupport.emitLoadString(CgenSupport.ACC, sym, s);
             } else if (type_decl.equals(TreeConstants.Bool)) {
-                CgenSupport.emitLoadBool(CgenSupport.S1, BoolConst.falsebool, s);
+                CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool, s);
             } else {
-                CgenSupport.emitLoadImm(CgenSupport.S1, 0, s);
+                CgenSupport.emitLoadImm(CgenSupport.ACC, 0, s);
             }
         } else {
             if (init instanceof int_const) {
                 int_const i = (int_const) init;
                 IntSymbol intAddr = (IntSymbol) AbstractTable.inttable.lookup(i.token.getString());
-                CgenSupport.emitLoadInt(CgenSupport.S1, intAddr, s);
+                CgenSupport.emitLoadInt(CgenSupport.ACC, intAddr, s);
             }
         }
+        t.emitStore(s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
 
         body.code(s, cgenNode, cgenTable);
 
