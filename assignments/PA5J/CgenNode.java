@@ -42,6 +42,8 @@ class CgenNode extends class_c {
     /** Does this node correspond to a basic class? */
     private int basic_status;
 
+    private int classTag = -1;
+
     /**
      * Constructs a new CgenNode to represent class "c".
      * 
@@ -116,7 +118,15 @@ class CgenNode extends class_c {
         }
     }
 
+    int classTag(){
+        if (classTag == -1) {
+            throw new IllegalStateException("classTag is not initialized.");
+        }
+        return classTag;
+    }
+
     void codeProtObj(PrintStream s, int classTag) {
+        this.classTag = classTag;
         s.println(CgenSupport.WORD + "-1");
         s.print(name.getString() + CgenSupport.PROTOBJ_SUFFIX + CgenSupport.LABEL);
         s.println(CgenSupport.WORD + classTag);
@@ -204,28 +214,6 @@ class CgenNode extends class_c {
         cgenTable.exitScope();
     }
 
-    // int getMethodOffset(String methodName) {
-    // int offset = 0;
-    // Vector<CgenNode> nodes = new Vector<CgenNode>();
-    // for (CgenNode c = this; c != null; c = c.getParentNd()) {
-    // nodes.add(c);
-    // }
-    // for (int i = nodes.size() - 1; i >= 0; i--) {
-    // CgenNode c = nodes.get(i);
-    // for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
-    // Feature f = (Feature) e.nextElement();
-    // if (f instanceof method) {
-    // method m = (method) f;
-    // if (m.name.getString().equals(methodName)) {
-    // return offset;
-    // }
-    // offset++;
-    // }
-    // }
-    // }
-    // return -1;
-    // }
-
     Vector<CgenNode> getLineage() {
         Vector<CgenNode> nodes = new Vector<CgenNode>();
         for (CgenNode c = this; c != null; c = c.getParentNd()) {
@@ -257,7 +245,7 @@ class CgenNode extends class_c {
             }
             offset++;
         }
-        throw new IllegalStateException("Attribute " + attrName + " is not found in class " + name);
+        throw new IllegalArgumentException("Attribute " + attrName + " is not found in class " + name);
     }
 
     Vector<method> getMethods() {
@@ -281,7 +269,7 @@ class CgenNode extends class_c {
             }
             offset++;
         }
-        throw new IllegalStateException("Method " + methodName + " is not found in class " + name);
+        throw new IllegalArgumentException("Method " + methodName + " is not found in class " + name);
     }
 }
 

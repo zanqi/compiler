@@ -241,6 +241,15 @@ abstract class Case extends TreeNode {
 
     public abstract void dump_with_types(PrintStream out, int n);
 
+    public abstract void code(
+            PrintStream s,
+            CgenNode cgenNode,
+            CgenClassTable cgenTable,
+            int tempId,
+            int done);
+
+    public abstract int numTemp();
+
 }
 
 /**
@@ -649,6 +658,29 @@ class branch extends Case {
         dump_AbstractSymbol(out, n + 2, name);
         dump_AbstractSymbol(out, n + 2, type_decl);
         expr.dump_with_types(out, n + 2);
+    }
+
+    @Override
+    public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId, int done) {
+        cgenTable.enterScope();
+        int nextCase = CgenSupport.labelIndex++;
+
+        CgenNode nd = (CgenNode) cgenTable.lookup(type_decl);
+        CgenSupport.emitBlti(CgenSupport.T2, nd.classTag(), nextCase, s);
+        CgenSupport.emitBgti(CgenSupport.T2, nd.classTag(), nextCase, s);
+        CgenTemp t = new CgenTemp(tempId);
+        cgenTable.addId(name, t);
+        t.emitStore(s);
+
+        expr.code(s, cgenNode, cgenTable, tempId + 1);
+        CgenSupport.emitBranch(done, s);
+        CgenSupport.emitLabelDef(nextCase, s);
+        cgenTable.exitScope();
+    }
+
+    @Override
+    public int numTemp() {
+        return expr.numTemp() + 1;
     }
 
 }
@@ -1072,11 +1104,36 @@ class typcase extends Expression {
      */
     @Override
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
+        expr.code(s, cgenNode, cgenTable, tempId);
+        CgenTemp t = new CgenTemp(tempId);
+        t.emitStore(s);
+        int done = CgenSupport.labelIndex++;
+        int nonNullBr = CgenSupport.labelIndex++;
+        CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, nonNullBr, s);
+
+        StringSymbol filename = (StringSymbol) AbstractTable.stringtable.lookup(cgenNode.getFilename().toString());
+        CgenSupport.emitLoadString(CgenSupport.ACC, filename, s);
+        CgenSupport.emitLoadImm(CgenSupport.T1, lineNumber, s);
+        CgenSupport.emitJal(CgenSupport.CASE_ON_NULL_ABORT, s);
+
+        CgenSupport.emitLabelDef(nonNullBr, s);
+        t.emitLoad(s, CgenSupport.T1);
+        CgenSupport.emitLoad(CgenSupport.T2, 0, CgenSupport.T1, s);
+        for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
+            ((Case) e.nextElement()).code(s, cgenNode, cgenTable, tempId + 1, done);
+        }
+        CgenSupport.emitJal(CgenSupport.CASE_NO_MATCH_ABORT, s);
+        CgenSupport.emitLabelDef(done, s);
     }
 
     @Override
     public int numTemp() {
-        return expr.numTemp();
+        int nt = expr.numTemp();
+        for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
+            nt = Math.max(((Case) e.nextElement()).numTemp() + 1, nt);
+        }
+
+        return nt;
     }
 
 }

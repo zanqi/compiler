@@ -120,6 +120,8 @@ class CgenSupport {
     final static String BGT = "\tbgt\t";
 
     final static String DISPATCH_ABORT = "_dispatch_abort";
+    final static String CASE_ON_NULL_ABORT = "_case_abort2";
+    final static String CASE_NO_MATCH_ABORT = "_case_abort";
     final static String EQUALITY_TEST = "equality_test";
     final static String OBJECT_COPY = "Object.copy";
     static int labelIndex = 0;
