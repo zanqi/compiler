@@ -298,6 +298,7 @@ class CgenTemp extends CgenVar {
         this.id = id;
     }
 
+    @Override
     public void emitStore(PrintStream s) {
         CgenSupport.emitStore(
                 CgenSupport.ACC,
@@ -306,9 +307,18 @@ class CgenTemp extends CgenVar {
                 s);
     }
 
+    @Override
     public void emitLoad(PrintStream s) {
         CgenSupport.emitLoad(
                 CgenSupport.ACC,
+                -id - 1,
+                CgenSupport.FP,
+                s);
+    }
+
+    public void emitLoad(PrintStream s, String dest) {
+        CgenSupport.emitLoad(
+                dest,
                 -id - 1,
                 CgenSupport.FP,
                 s);
