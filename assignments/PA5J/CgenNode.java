@@ -23,6 +23,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 import java.io.PrintStream;
 import java.util.Vector;
+import java.util.Collections;
 import java.util.Enumeration;
 
 class CgenNode extends class_c {
@@ -155,7 +156,9 @@ class CgenNode extends class_c {
     }
 
     void codeObjInit(PrintStream s, CgenClassTable cgenTable) {
+        cgenTable.enterScope();
         s.print(CgenSupport.objInitRef(name) + CgenSupport.LABEL);
+        // todo: obj should not be fixed at size 12
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);
         CgenSupport.emitStore(CgenSupport.FP, 3, CgenSupport.SP, s);
         CgenSupport.emitStore(CgenSupport.SELF, 2, CgenSupport.SP, s);
@@ -173,7 +176,7 @@ class CgenNode extends class_c {
                 if (a.init instanceof no_expr) {
                     continue;
                 }
-                a.init.code(s, this, cgenTable);
+                a.init.code(s, this, cgenTable, 0);
                 CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
             }
         }
@@ -183,16 +186,13 @@ class CgenNode extends class_c {
         CgenSupport.emitLoad(CgenSupport.RA, 1, CgenSupport.SP, s);
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 12, s);
         CgenSupport.emitReturn(s);
+        cgenTable.exitScope();
     }
 
     void codeMethods(PrintStream s, CgenClassTable cgenTable) {
         cgenTable.enterScope();
-        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
-            Feature f = (Feature) e.nextElement();
-            if (f instanceof attr) {
-                attr a = (attr) f;
-                cgenTable.addId(a.name, new CgenAttr(a.name, this));
-            }
+        for (attr a : getAttrs()) {
+            cgenTable.addId(a.name, new CgenAttr(a.name, this));
         }
         for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
             Feature f = (Feature) e.nextElement();
@@ -204,53 +204,90 @@ class CgenNode extends class_c {
         cgenTable.exitScope();
     }
 
-    int getMethodOffset(String methodName) {
-        int offset = 0;
+    // int getMethodOffset(String methodName) {
+    // int offset = 0;
+    // Vector<CgenNode> nodes = new Vector<CgenNode>();
+    // for (CgenNode c = this; c != null; c = c.getParentNd()) {
+    // nodes.add(c);
+    // }
+    // for (int i = nodes.size() - 1; i >= 0; i--) {
+    // CgenNode c = nodes.get(i);
+    // for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
+    // Feature f = (Feature) e.nextElement();
+    // if (f instanceof method) {
+    // method m = (method) f;
+    // if (m.name.getString().equals(methodName)) {
+    // return offset;
+    // }
+    // offset++;
+    // }
+    // }
+    // }
+    // return -1;
+    // }
+
+    Vector<CgenNode> getLineage() {
         Vector<CgenNode> nodes = new Vector<CgenNode>();
         for (CgenNode c = this; c != null; c = c.getParentNd()) {
             nodes.add(c);
         }
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            CgenNode c = nodes.get(i);
-            for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
-                Feature f = (Feature) e.nextElement();
-                if (f instanceof method) {
-                    method m = (method) f;
-                    if (m.name.getString().equals(methodName)) {
-                        return offset;
-                    }
-                    offset++;
-                }
-            }
-        }
-        return -1;
+        Collections.reverse(nodes);
+        return nodes;
     }
 
-    int getAttrOffset(AbstractSymbol attrName) {
-        int offset = 0;
-        Vector<CgenNode> nodes = new Vector<CgenNode>();
-        for (CgenNode c = this; c != null; c = c.getParentNd()) {
-            nodes.add(c);
-        }
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            CgenNode c = nodes.get(i);
+    Vector<attr> getAttrs() {
+        Vector<attr> attrs = new Vector<attr>();
+        for (CgenNode c : getLineage()) {
             for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
                 Feature f = (Feature) e.nextElement();
                 if (f instanceof attr) {
                     attr a = (attr) f;
-                    if (a.name.equalString(attrName)) {
-                        return offset;
-                    }
-                    offset++;
+                    attrs.add(a);
                 }
             }
         }
-        return -1;
+        return attrs;
+    }
+
+    int getAttrOffset(AbstractSymbol attrName) {
+        int offset = 0;
+        for (attr a : getAttrs()) {
+            if (a.name.equalString(attrName)) {
+                return offset;
+            }
+            offset++;
+        }
+        throw new IllegalStateException("Attribute " + attrName + " is not found in class " + name);
+    }
+
+    Vector<method> getMethods() {
+        Vector<method> attrs = new Vector<method>();
+        for (CgenNode c : getLineage()) {
+            for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
+                Feature f = (Feature) e.nextElement();
+                if (f instanceof method) {
+                    attrs.add((method) f);
+                }
+            }
+        }
+        return attrs;
+    }
+
+    int getMethodOffset(AbstractSymbol methodName) {
+        int offset = 0;
+        for (method m : getMethods()) {
+            if (m.name.equalString(methodName)) {
+                return offset;
+            }
+            offset++;
+        }
+        throw new IllegalStateException("Method " + methodName + " is not found in class " + name);
     }
 }
 
 abstract class CgenVar {
     public abstract void emitStore(PrintStream s);
+
     public abstract void emitLoad(PrintStream s);
 }
 
@@ -263,18 +300,18 @@ class CgenTemp extends CgenVar {
 
     public void emitStore(PrintStream s) {
         CgenSupport.emitStore(
-                    CgenSupport.ACC,
-                    -id-1,
-                    CgenSupport.FP,
-                    s);
+                CgenSupport.ACC,
+                -id - 1,
+                CgenSupport.FP,
+                s);
     }
 
     public void emitLoad(PrintStream s) {
         CgenSupport.emitLoad(
-                    CgenSupport.ACC,
-                    -id-1,
-                    CgenSupport.FP,
-                    s);
+                CgenSupport.ACC,
+                -id - 1,
+                CgenSupport.FP,
+                s);
     }
 }
 
@@ -289,18 +326,18 @@ class CgenFormal extends CgenVar {
 
     public void emitStore(PrintStream s) {
         CgenSupport.emitStore(
-                    CgenSupport.ACC,
-                    total - id - 1 + CgenSupport.DEFAULT_OBJFIELDS, 
-                    CgenSupport.FP,
-                    s);
+                CgenSupport.ACC,
+                total - id - 1 + CgenSupport.DEFAULT_OBJFIELDS,
+                CgenSupport.FP,
+                s);
     }
 
     public void emitLoad(PrintStream s) {
         CgenSupport.emitLoad(
-                    CgenSupport.ACC,
-                    total - id - 1 + CgenSupport.DEFAULT_OBJFIELDS, 
-                    CgenSupport.FP,
-                    s);
+                CgenSupport.ACC,
+                total - id - 1 + CgenSupport.DEFAULT_OBJFIELDS,
+                CgenSupport.FP,
+                s);
     }
 }
 
@@ -316,18 +353,18 @@ class CgenAttr extends CgenVar {
     public void emitStore(PrintStream s) {
         int offset = node.getAttrOffset(name) + CgenSupport.DEFAULT_OBJFIELDS;
         CgenSupport.emitStore(
-            CgenSupport.ACC,
-            offset,
-            CgenSupport.SELF,
-            s);
+                CgenSupport.ACC,
+                offset,
+                CgenSupport.SELF,
+                s);
     }
 
     public void emitLoad(PrintStream s) {
         int offset = node.getAttrOffset(name) + CgenSupport.DEFAULT_OBJFIELDS;
         CgenSupport.emitLoad(
-            CgenSupport.ACC,
-            offset,
-            CgenSupport.SELF,
-            s);
+                CgenSupport.ACC,
+                offset,
+                CgenSupport.SELF,
+                s);
     }
 }
