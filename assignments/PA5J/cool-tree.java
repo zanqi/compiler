@@ -497,7 +497,6 @@ class method extends Feature {
         int i = 0;
         int numParams = formals.size();
         int numTemps = expr.numTemp();
-        int numStackFields = CgenSupport.DEFAULT_OBJFIELDS + numTemps;
         for (Enumeration e = formals.getElements(); e.hasMoreElements(); i++) {
             formalc f = (formalc) e.nextElement();
             cgenTable.addId(f.name, new CgenFormal(i, numParams));
@@ -506,23 +505,11 @@ class method extends Feature {
         CgenSupport.emitMethodRef(cgenNode.getName(), name, s);
         s.print(CgenSupport.LABEL);
 
-        int stackSize = numStackFields * CgenSupport.WORD_SIZE;
-
-        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -stackSize, s);
-        CgenSupport.emitStore(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
-        CgenSupport.emitStore(CgenSupport.SELF, numStackFields - 1, CgenSupport.SP, s);
-        CgenSupport.emitStore(CgenSupport.RA, numStackFields - 2, CgenSupport.SP, s);
-        CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4 * (numTemps + 1), s);
-        CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
+        CgenSupport.emitMethodStart(numTemps, s);
 
         expr.code(s, cgenNode, cgenTable, 0);
 
-        CgenSupport.emitLoad(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
-        CgenSupport.emitLoad(CgenSupport.SELF, numStackFields - 1, CgenSupport.SP, s);
-        CgenSupport.emitLoad(CgenSupport.RA, numStackFields - 2, CgenSupport.SP, s);
-        stackSize = (numStackFields + numParams) * CgenSupport.WORD_SIZE;
-        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, stackSize, s);
-        CgenSupport.emitReturn(s);
+        CgenSupport.emitMethodEnd(numTemps, numParams, s);
         cgenTable.exitScope();
     }
 }

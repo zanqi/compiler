@@ -373,6 +373,29 @@ class CgenSupport {
         s.println(RET);
     }
 
+    static void emitMethodStart(int numTemp, PrintStream s) {
+        int numStackFields = CgenSupport.DEFAULT_OBJFIELDS + numTemp;
+        int stackSize = numStackFields * CgenSupport.WORD_SIZE;
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -stackSize, s);
+        CgenSupport.emitStore(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
+        CgenSupport.emitStore(CgenSupport.SELF, numStackFields - 1, CgenSupport.SP, s);
+        CgenSupport.emitStore(CgenSupport.RA, numStackFields - 2, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4 * (numTemp + 1), s);
+        CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
+    }
+
+    static void emitMethodEnd(int numTemp, int numParam, PrintStream s) {
+        int numStackFields = CgenSupport.DEFAULT_OBJFIELDS + numTemp;
+        int stackSize = (numStackFields + numParam) * CgenSupport.WORD_SIZE;
+
+        CgenSupport.emitLoad(CgenSupport.FP, numStackFields, CgenSupport.SP, s);
+        CgenSupport.emitLoad(CgenSupport.SELF, numStackFields - 1, CgenSupport.SP, s);
+        CgenSupport.emitLoad(CgenSupport.RA, numStackFields - 2, CgenSupport.SP, s);
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, stackSize, s);
+        CgenSupport.emitReturn(s);
+    }
+
     /**
      * Emits a call to gc_assign.
      * 

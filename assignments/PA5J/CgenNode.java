@@ -170,35 +170,29 @@ class CgenNode extends class_c {
         for (attr a : getAttrs()) {
             cgenTable.addId(a.name, new CgenAttr(a.name, this));
         }
+        Vector<attr> attrs = getLocalAttrs();
+        int nt = 0;
+        for (attr a : attrs) {
+            nt = Math.max(nt, a.init.numTemp());
+        }
+
         s.print(CgenSupport.objInitRef(name) + CgenSupport.LABEL);
-        // todo: obj should not be fixed at size 12
-        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);
-        CgenSupport.emitStore(CgenSupport.FP, 3, CgenSupport.SP, s);
-        CgenSupport.emitStore(CgenSupport.SELF, 2, CgenSupport.SP, s);
-        CgenSupport.emitStore(CgenSupport.RA, 1, CgenSupport.SP, s);
-        CgenSupport.emitAddiu(CgenSupport.FP, CgenSupport.SP, 4, s);
-        CgenSupport.emitMove(CgenSupport.SELF, CgenSupport.ACC, s);
+        CgenSupport.emitMethodStart(nt, s);
+
         if (getParentNd() != null && !getParentNd().name.equals(TreeConstants.No_class)) {
             s.println(CgenSupport.JAL + CgenSupport.objInitRef(getParentNd().name));
         }
         int offset = 0;
-        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
-            Feature f = (Feature) e.nextElement();
-            if (f instanceof attr) {
-                attr a = (attr) f;
-                if (a.init instanceof no_expr) {
-                    continue;
-                }
-                a.init.code(s, this, cgenTable, 0);
-                CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
+        for (attr a : attrs) {
+            if (a.init instanceof no_expr) {
+                continue;
             }
+            a.init.code(s, this, cgenTable, 0);
+            CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
         }
         CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
-        CgenSupport.emitLoad(CgenSupport.FP, 3, CgenSupport.SP, s);
-        CgenSupport.emitLoad(CgenSupport.SELF, 2, CgenSupport.SP, s);
-        CgenSupport.emitLoad(CgenSupport.RA, 1, CgenSupport.SP, s);
-        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 12, s);
-        CgenSupport.emitReturn(s);
+
+        CgenSupport.emitMethodEnd(nt, 0, s);
         cgenTable.exitScope();
     }
 
@@ -226,16 +220,28 @@ class CgenNode extends class_c {
         return nodes;
     }
 
+    Vector<attr> getLocalAttrs() {
+        Vector<attr> attrs = new Vector<attr>();
+        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
+            Feature f = (Feature) e.nextElement();
+            if (f instanceof attr) {
+                attrs.add((attr) f);
+            }
+        }
+        return attrs;
+    }
+
     Vector<attr> getAttrs() {
         Vector<attr> attrs = new Vector<attr>();
         for (CgenNode c : getLineage()) {
-            for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
-                Feature f = (Feature) e.nextElement();
-                if (f instanceof attr) {
-                    attr a = (attr) f;
-                    attrs.add(a);
-                }
-            }
+            attrs.addAll(c.getLocalAttrs());
+            // for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
+            //     Feature f = (Feature) e.nextElement();
+            //     if (f instanceof attr) {
+            //         attr a = (attr) f;
+            //         attrs.add(a);
+            //     }
+            // }
         }
         return attrs;
     }
