@@ -118,7 +118,7 @@ class CgenNode extends class_c {
         }
     }
 
-    int classTag(){
+    int classTag() {
         if (classTag == -1) {
             throw new IllegalStateException("classTag is not initialized.");
         }
@@ -167,6 +167,9 @@ class CgenNode extends class_c {
 
     void codeObjInit(PrintStream s, CgenClassTable cgenTable) {
         cgenTable.enterScope();
+        for (attr a : getAttrs()) {
+            cgenTable.addId(a.name, new CgenAttr(a.name, this));
+        }
         s.print(CgenSupport.objInitRef(name) + CgenSupport.LABEL);
         // todo: obj should not be fixed at size 12
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -12, s);

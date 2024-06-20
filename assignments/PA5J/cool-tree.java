@@ -810,16 +810,40 @@ class static_dispatch extends Expression {
      */
     @Override
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
+        for (Enumeration e = actual.getElements(); e.hasMoreElements();) {
+            Expression expr = (Expression) e.nextElement();
+            expr.code(s, cgenNode, cgenTable, tempId);
+            CgenSupport.emitStore(CgenSupport.ACC, 0, CgenSupport.SP, s);
+            CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, -CgenSupport.WORD_SIZE, s);
+        }
+
+        expr.code(s, cgenNode, cgenTable, tempId);
+
+        int nonNullBr = CgenSupport.labelIndex++;
+        CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, nonNullBr, s);
+        // Null object
+        StringSymbol filename = (StringSymbol) AbstractTable.stringtable.lookup(cgenNode.getFilename().toString());
+        CgenSupport.emitLoadString(CgenSupport.ACC, filename, s);
+        CgenSupport.emitLoadImm(CgenSupport.T1, lineNumber, s);
+        CgenSupport.emitJal(CgenSupport.DISPATCH_ABORT, s);
+
+        CgenSupport.emitLabelDef(nonNullBr, s);
+        // load dispatch table
+        CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
+        CgenNode nd = expr.get_type().equalString(TreeConstants.SELF_TYPE) ? cgenNode
+                : (CgenNode) cgenTable.lookup(expr.get_type());
+        CgenSupport.emitLoad(CgenSupport.T1, nd.getMethodOffset(name), CgenSupport.T1, s);
+        CgenSupport.emitJalr(CgenSupport.T1, s);
     }
 
     @Override
     public int numTemp() {
-        int nt = 0;
+        int nt = expr.numTemp();
         for (Enumeration e = actual.getElements(); e.hasMoreElements();) {
             Expression expr = (Expression) e.nextElement();
             nt = Math.max(nt, expr.numTemp());
         }
-        return Math.max(nt, expr.numTemp());
+        return nt;
     }
 }
 
@@ -910,12 +934,12 @@ class dispatch extends Expression {
 
     @Override
     public int numTemp() {
-        int nt = 0;
+        int nt = expr.numTemp();
         for (Enumeration e = actual.getElements(); e.hasMoreElements();) {
             Expression expr = (Expression) e.nextElement();
             nt = Math.max(nt, expr.numTemp());
         }
-        return Math.max(nt, expr.numTemp());
+        return nt;
     }
 
 }
@@ -978,7 +1002,7 @@ class cond extends Expression {
         int elsebr = CgenSupport.labelIndex++;
         int endif = CgenSupport.labelIndex++;
         pred.code(s, cgenNode, cgenTable, tempId);
-        CgenSupport.emitLoad(CgenSupport.T1, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.ACC, s);
+        CgenSupport.emitLoadObjData(CgenSupport.T1, CgenSupport.ACC, s);
         CgenSupport.emitBeqz(CgenSupport.T1, elsebr, s);
         then_exp.code(s, cgenNode, cgenTable, tempId);
         CgenSupport.emitBranch(endif, s);
@@ -1044,6 +1068,18 @@ class loop extends Expression {
      */
     @Override
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
+        int trueBranch = CgenSupport.labelIndex++;
+        int falseBranch = CgenSupport.labelIndex++;
+
+        CgenSupport.emitLabelDef(trueBranch, s);
+        pred.code(s, cgenNode, cgenTable, tempId);
+        CgenSupport.emitLoadObjData(CgenSupport.T1, CgenSupport.ACC, s);
+        CgenSupport.emitBeq(CgenSupport.T1, CgenSupport.ZERO, falseBranch, s);
+        body.code(s, cgenNode, cgenTable, tempId);
+        CgenSupport.emitBranch(trueBranch, s);
+
+        CgenSupport.emitLabelDef(falseBranch, s);
+        CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.ZERO, s);
     }
 
     @Override

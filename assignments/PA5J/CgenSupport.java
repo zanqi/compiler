@@ -141,6 +141,10 @@ class CgenSupport {
                 + "(" + source_reg + ")");
     }
 
+    static void emitLoadObjData(String dest_reg, String source_reg, PrintStream s) {
+        CgenSupport.emitLoad(CgenSupport.T1, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.ACC, s);
+    }
+
     /**
      * Emits an SW instruction.
      * 
