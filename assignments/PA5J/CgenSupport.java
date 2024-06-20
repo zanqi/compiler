@@ -463,6 +463,13 @@ class CgenSupport {
         s.println("");
     }
 
+    static void emitTorF(String src, int label, PrintStream s) {
+        CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.truebool.ref(), s);
+        CgenSupport.emitBeqz(src, label, s);
+        CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.falsebool.ref(), s);
+        CgenSupport.emitLabelDef(label, s);
+    }
+
     /**
      * Emits a BEQ instruction.
      * 

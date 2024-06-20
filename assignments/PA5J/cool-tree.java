@@ -1966,6 +1966,10 @@ class comp extends Expression {
      */
     @Override
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
+        int done = CgenSupport.labelIndex++;
+        e1.code(s, cgenNode, cgenTable, tempId);
+        CgenSupport.emitLoadObjData(CgenSupport.T1, CgenSupport.ACC, s);
+        CgenSupport.emitTorF(CgenSupport.T1, done, s);
     }
 
     @Override
@@ -2242,13 +2246,7 @@ class isvoid extends Expression {
                 CgenSupport.T1,
                 CgenSupport.ACC,
                 s);
-        CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.truebool.ref(), s);
-
-        CgenSupport.emitBeqz(CgenSupport.T1, endIsVoid, s);
-
-        CgenSupport.emitLoadAddress(CgenSupport.ACC, BoolConst.falsebool.ref(), s);
-
-        CgenSupport.emitLabelDef(endIsVoid, s);
+        CgenSupport.emitTorF(CgenSupport.T1, endIsVoid, s);
     }
 
     @Override
