@@ -142,7 +142,11 @@ class CgenSupport {
     }
 
     static void emitLoadObjData(String dest_reg, String source_reg, PrintStream s) {
-        CgenSupport.emitLoad(CgenSupport.T1, CgenSupport.DEFAULT_OBJFIELDS, CgenSupport.ACC, s);
+        CgenSupport.emitLoad(dest_reg, CgenSupport.DEFAULT_OBJFIELDS, source_reg, s);
+    }
+
+    static void emitStoreObjData(String source_reg, String dest_reg, PrintStream s) {
+        CgenSupport.emitStore(source_reg, CgenSupport.DEFAULT_OBJFIELDS, dest_reg, s);
     }
 
     /**

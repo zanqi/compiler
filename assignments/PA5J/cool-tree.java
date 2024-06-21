@@ -1643,7 +1643,10 @@ class neg extends Expression {
     @Override
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
         e1.code(s, cgenNode, cgenTable, tempId);
-        CgenSupport.emitNeg(CgenSupport.ACC, CgenSupport.ACC, s);
+        CgenSupport.emitJal(CgenSupport.OBJECT_COPY, s);
+        CgenSupport.emitLoadObjData(CgenSupport.T1, CgenSupport.ACC, s);
+        CgenSupport.emitNeg(CgenSupport.T1, CgenSupport.T1, s);
+        CgenSupport.emitStoreObjData(CgenSupport.T1, CgenSupport.ACC, s);
     }
 
     @Override
