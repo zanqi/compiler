@@ -123,37 +123,27 @@ class CgenNode extends class_c {
         s.println(CgenSupport.WORD + "-1");
         s.print(name.getString() + CgenSupport.PROTOBJ_SUFFIX + CgenSupport.LABEL);
         s.println(CgenSupport.WORD + classTag);
-        int numAttrs = 0;
-        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
-            Feature f = (Feature) e.nextElement();
-            if (f instanceof attr) {
-                numAttrs++;
-            }
-        }
-        s.println(CgenSupport.WORD + (CgenSupport.DEFAULT_OBJFIELDS + numAttrs));
+        Vector<attr> attrs = getAttrs();
+        s.println(CgenSupport.WORD + (CgenSupport.DEFAULT_OBJFIELDS + attrs.size()));
 
         s.println(CgenSupport.WORD + name.getString() + CgenSupport.DISPTAB_SUFFIX); // dispatch table
-        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
-            Feature f = (Feature) e.nextElement();
-            if (f instanceof attr) {
-                attr a = (attr) f;
-                if (a.type_decl.equals(TreeConstants.Int)) {
-                    IntSymbol intSymbol = (IntSymbol) AbstractTable.inttable.addInt(0);
-                    s.print(CgenSupport.WORD);
-                    intSymbol.codeRef(s);
-                    s.println("");
-                } else if (a.type_decl.equals(TreeConstants.Str)) {
-                    StringSymbol stringSymbol = (StringSymbol) AbstractTable.stringtable.addString("");
-                    s.print(CgenSupport.WORD);
-                    stringSymbol.codeRef(s);
-                    s.println("");
-                } else if (a.type_decl.equals(TreeConstants.Bool)) {
-                    s.print(CgenSupport.WORD);
-                    BoolConst.falsebool.codeRef(s);
-                    s.println("");
-                } else {
-                    s.println(CgenSupport.WORD + "0");
-                }
+        for (attr a : attrs) {
+            if (a.type_decl.equals(TreeConstants.Int)) {
+                IntSymbol intSymbol = (IntSymbol) AbstractTable.inttable.addInt(0);
+                s.print(CgenSupport.WORD);
+                intSymbol.codeRef(s);
+                s.println("");
+            } else if (a.type_decl.equals(TreeConstants.Str)) {
+                StringSymbol stringSymbol = (StringSymbol) AbstractTable.stringtable.addString("");
+                s.print(CgenSupport.WORD);
+                stringSymbol.codeRef(s);
+                s.println("");
+            } else if (a.type_decl.equals(TreeConstants.Bool)) {
+                s.print(CgenSupport.WORD);
+                BoolConst.falsebool.codeRef(s);
+                s.println("");
+            } else {
+                s.println(CgenSupport.WORD + "0");
             }
         }
     }
@@ -204,14 +194,14 @@ class CgenNode extends class_c {
         cgenTable.exitScope();
     }
 
-    Vector<CgenNode> getLineage() {
-        Vector<CgenNode> nodes = new Vector<CgenNode>();
-        for (CgenNode c = this; c != null; c = c.getParentNd()) {
-            nodes.add(c);
-        }
-        Collections.reverse(nodes);
-        return nodes;
-    }
+    // Vector<CgenNode> getLineage() {
+    // Vector<CgenNode> nodes = new Vector<CgenNode>();
+    // for (CgenNode c = this; c != null; c = c.getParentNd()) {
+    // nodes.add(c);
+    // }
+    // Collections.reverse(nodes);
+    // return nodes;
+    // }
 
     Vector<attr> getLocalAttrs() {
         Vector<attr> attrs = new Vector<attr>();
@@ -238,10 +228,9 @@ class CgenNode extends class_c {
     }
 
     Vector<attr> getAttrs() {
-        Vector<attr> attrs = new Vector<attr>();
-        for (CgenNode c : getLineage()) {
-            attrs.addAll(c.getLocalAttrs());
-        }
+        CgenNode p = getParentNd();
+        Vector<attr> attrs = p == null ? new Vector<>() : p.getAttrs();
+        attrs.addAll(getLocalAttrs());
         return attrs;
     }
 
@@ -258,7 +247,7 @@ class CgenNode extends class_c {
 
     Vector<method> getMethods() {
         CgenNode p = getParentNd();
-        Vector<method> methods = p == null ? new Vector<>() : getParentNd().getMethods();
+        Vector<method> methods = p == null ? new Vector<>() : p.getMethods();
         for (method m : getLocalMethods()) {
             for (int i = 0; i < methods.size(); i++) {
                 if (methods.get(i).name.equalString(m.name)) {
