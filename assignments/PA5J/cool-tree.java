@@ -816,7 +816,7 @@ class static_dispatch extends Expression {
 
         CgenSupport.emitLabelDef(nonNullBr, s);
         // load dispatch table
-        CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
+        CgenSupport.emitLoadAddress(CgenSupport.T1, CgenSupport.dispTableRef(type_name), s);
         CgenNode nd = expr.get_type().equalString(TreeConstants.SELF_TYPE) ? cgenNode
                 : (CgenNode) cgenTable.lookup(expr.get_type());
         CgenSupport.emitLoad(CgenSupport.T1, nd.getMethodOffset(name), CgenSupport.T1, s);
