@@ -145,6 +145,10 @@ class CgenSupport {
         CgenSupport.emitLoad(dest_reg, CgenSupport.DEFAULT_OBJFIELDS, source_reg, s);
     }
 
+    static void emitLoadObjTag(String dest_reg, String source_reg, PrintStream s) {
+        CgenSupport.emitLoad(dest_reg, 0, source_reg, s);
+    }
+
     static void emitStoreObjData(String source_reg, String dest_reg, PrintStream s) {
         CgenSupport.emitStore(source_reg, CgenSupport.DEFAULT_OBJFIELDS, dest_reg, s);
     }
@@ -454,6 +458,21 @@ class CgenSupport {
             AbstractSymbol methodname,
             PrintStream s) {
         s.print(classname + METHOD_SEP + methodname);
+    }
+
+    static void emitDispTableEntry(AbstractSymbol classname,
+            AbstractSymbol methodname,
+            PrintStream s) {
+        s.print(CgenSupport.WORD);
+        emitMethodRef(classname, methodname, s);
+        s.println();
+    }
+
+    static void emitMethodDef(AbstractSymbol classname,
+            AbstractSymbol methodname,
+            PrintStream s) {
+        emitMethodRef(classname, methodname, s);
+        s.print(CgenSupport.LABEL);
     }
 
     /**

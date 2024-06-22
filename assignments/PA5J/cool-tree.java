@@ -450,6 +450,7 @@ class method extends Feature {
     public Formals formals;
     public AbstractSymbol return_type;
     public Expression expr;
+    public AbstractSymbol className; // used by disp table creation
 
     /**
      * Creates "method" AST node.
@@ -502,8 +503,7 @@ class method extends Feature {
             cgenTable.addId(f.name, new CgenFormal(i, numParams));
         }
 
-        CgenSupport.emitMethodRef(cgenNode.getName(), name, s);
-        s.print(CgenSupport.LABEL);
+        CgenSupport.emitMethodDef(cgenNode.getName(), name, s);
 
         CgenSupport.emitMethodStart(numTemps, s);
 
@@ -2175,14 +2175,33 @@ class new_ extends Expression {
      */
     @Override
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
+        if (type_name.equalString(TreeConstants.SELF_TYPE)) {
+            codeSelfType(s, cgenNode, cgenTable, tempId);
+            return;
+        }
         CgenSupport.emitLoadProtObj(type_name, s);
         CgenSupport.emitJal(CgenSupport.OBJECT_COPY, s);
         CgenSupport.emitJal(type_name + CgenSupport.CLASSINIT_SUFFIX, s);
     }
 
+    private void codeSelfType(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
+        CgenSupport.emitLoadAddress(CgenSupport.T1, CgenSupport.CLASSOBJTAB, s);
+        CgenSupport.emitLoadObjTag(CgenSupport.T2, CgenSupport.SELF, s);
+        CgenSupport.emitSll(CgenSupport.T2, CgenSupport.T2, 3, s);
+        CgenSupport.emitAddu(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s); // T1 = prot_obj
+        CgenTemp t = new CgenTemp(tempId);
+        t.emitStore(s, CgenSupport.T1);
+
+        CgenSupport.emitLoad(CgenSupport.ACC, 0, CgenSupport.T1, s);
+        CgenSupport.emitJal(CgenSupport.OBJECT_COPY, s);
+        t.emitLoad(s, CgenSupport.T1);
+        CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.T1, s); // T1 = class_init
+        CgenSupport.emitJalr(CgenSupport.T1, s);
+    }
+
     @Override
     public int numTemp() {
-        return 0;
+        return type_name.equalString(TreeConstants.SELF_TYPE) ? 1 : 0;
     }
 }
 

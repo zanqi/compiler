@@ -105,16 +105,9 @@ class CgenNode extends class_c {
         return basic_status == Basic;
     }
 
-    void codeDispatchTable(PrintStream str) {
-        if (getParentNd() != null) {
-            getParentNd().codeDispatchTable(str);
-        }
-        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
-            Feature f = (Feature) e.nextElement();
-            if (f instanceof method) {
-                method m = (method) f;
-                str.println(CgenSupport.WORD + name.getString() + "." + m.name.getString());
-            }
+    void codeDispatchTable(PrintStream s) {
+        for (method m : getMethods()) {
+            CgenSupport.emitDispTableEntry(m.className, m.name, s);
         }
     }
 
@@ -231,17 +224,23 @@ class CgenNode extends class_c {
         return attrs;
     }
 
+    Vector<method> getLocalMethods() {
+        Vector<method> methods = new Vector<method>();
+        for (Enumeration e = getFeatures().getElements(); e.hasMoreElements();) {
+            Feature f = (Feature) e.nextElement();
+            if (f instanceof method) {
+                method m = (method) f;
+                m.className = name;
+                methods.add(m);
+            }
+        }
+        return methods;
+    }
+
     Vector<attr> getAttrs() {
         Vector<attr> attrs = new Vector<attr>();
         for (CgenNode c : getLineage()) {
             attrs.addAll(c.getLocalAttrs());
-            // for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
-            //     Feature f = (Feature) e.nextElement();
-            //     if (f instanceof attr) {
-            //         attr a = (attr) f;
-            //         attrs.add(a);
-            //     }
-            // }
         }
         return attrs;
     }
@@ -258,16 +257,17 @@ class CgenNode extends class_c {
     }
 
     Vector<method> getMethods() {
-        Vector<method> attrs = new Vector<method>();
-        for (CgenNode c : getLineage()) {
-            for (Enumeration e = c.getFeatures().getElements(); e.hasMoreElements();) {
-                Feature f = (Feature) e.nextElement();
-                if (f instanceof method) {
-                    attrs.add((method) f);
+        CgenNode p = getParentNd();
+        Vector<method> methods = p == null ? new Vector<>() : getParentNd().getMethods();
+        for (method m : getLocalMethods()) {
+            for (int i = 0; i < methods.size(); i++) {
+                if (methods.get(i).name.equalString(m.name)) {
+                    methods.set(i, m);
                 }
             }
+            methods.add(m);
         }
-        return attrs;
+        return methods;
     }
 
     int getMethodOffset(AbstractSymbol methodName) {
@@ -297,8 +297,12 @@ class CgenTemp extends CgenVar {
 
     @Override
     public void emitStore(PrintStream s) {
+        emitStore(s, CgenSupport.ACC);
+    }
+
+    public void emitStore(PrintStream s, String src) {
         CgenSupport.emitStore(
-                CgenSupport.ACC,
+                src,
                 -id - 1,
                 CgenSupport.FP,
                 s);
@@ -306,11 +310,7 @@ class CgenTemp extends CgenVar {
 
     @Override
     public void emitLoad(PrintStream s) {
-        CgenSupport.emitLoad(
-                CgenSupport.ACC,
-                -id - 1,
-                CgenSupport.FP,
-                s);
+        emitLoad(s, CgenSupport.ACC);
     }
 
     public void emitLoad(PrintStream s, String dest) {

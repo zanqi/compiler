@@ -23,7 +23,9 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 import java.io.PrintStream;
 import java.util.Vector;
+import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * This class is used for representing the inheritance tree during code
@@ -38,11 +40,20 @@ class CgenClassTable extends SymbolTable {
     /** This is the stream to which assembly instructions are output */
     private PrintStream str;
 
-    private int objectclasstag;
-    private int ioclasstag;
-    private int stringclasstag;
-    private int intclasstag;
-    private int boolclasstag;
+    // Do not change, object.abort() expect these numbers
+    private int objectclasstag = 0; 
+    private int ioclasstag = 1;
+    private int intclasstag = 2;
+    private int boolclasstag = 3;
+    private int stringclasstag = 4;
+    private int mainclasstag = 5;
+    private Map<AbstractSymbol, Integer> classTags = Map.of(
+            TreeConstants.Object_, objectclasstag,
+            TreeConstants.IO, ioclasstag,
+            TreeConstants.Main, mainclasstag,
+            TreeConstants.Int, intclasstag,
+            TreeConstants.Bool, boolclasstag,
+            TreeConstants.Str, stringclasstag);
 
     // The following methods emit code for constants and global
     // declarations.
@@ -379,12 +390,6 @@ class CgenClassTable extends SymbolTable {
 
         this.str = str;
 
-        objectclasstag = 0;
-        ioclasstag = 1;
-        intclasstag = 2 /* Change to your Int class tag here */;
-        boolclasstag = 3 /* Change to your Bool class tag here */;
-        stringclasstag = 4 /* Change to your String class tag here */;
-
         enterScope();
         if (Flags.cgen_debug)
             System.out.println("Building CgenClassTable");
@@ -480,27 +485,17 @@ class CgenClassTable extends SymbolTable {
         str.print(CgenSupport.CLASSNAMETAB + CgenSupport.LABEL);
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            StringSymbol sym = (StringSymbol)AbstractTable.stringtable.lookup(nd.name.getString());
+            StringSymbol sym = (StringSymbol) AbstractTable.stringtable.lookup(nd.name.getString());
             str.println(CgenSupport.WORD + sym.refStr());
         }
     }
 
     private void codePrototypes() {
-        int nextclasstag = 5;
+        int nextclasstag = stringclasstag + 1;
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            int classtag = 0;
-            if (nd.name.equals(TreeConstants.Str)) {
-                classtag = stringclasstag;
-            } else if (nd.name.equals(TreeConstants.Int)) {
-                classtag = intclasstag;
-            } else if (nd.name.equals(TreeConstants.Bool)) {
-                classtag = boolclasstag;
-            } else if (nd.name.equals(TreeConstants.Object_)) {
-                classtag = objectclasstag;
-            } else if (nd.name.equals(TreeConstants.IO)) {
-                classtag = ioclasstag;
-            } else {
+            Integer classtag = classTags.get(nd.name);
+            if (classtag == null) {
                 classtag = nextclasstag++;
             }
             nd.codeProtObj(str, classtag);
