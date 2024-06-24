@@ -23,8 +23,10 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 import java.io.PrintStream;
 import java.util.Vector;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,19 +43,109 @@ class CgenClassTable extends SymbolTable {
     private PrintStream str;
 
     // Do not change, object.abort() expect these numbers
-    private int objectclasstag = 0; 
-    private int ioclasstag = 1;
-    private int intclasstag = 2;
-    private int boolclasstag = 3;
-    private int stringclasstag = 4;
-    private int mainclasstag = 5;
-    private Map<AbstractSymbol, Integer> classTags = Map.of(
-            TreeConstants.Object_, objectclasstag,
-            TreeConstants.IO, ioclasstag,
-            TreeConstants.Main, mainclasstag,
-            TreeConstants.Int, intclasstag,
-            TreeConstants.Bool, boolclasstag,
-            TreeConstants.Str, stringclasstag);
+    // private int objectclasstag = 0;
+    // private int ioclasstag = 1;
+    // private int intclasstag = 2;
+    // private int boolclasstag = 3;
+    // private int stringclasstag = 4;
+    // private int mainclasstag = 5;
+    // private Map<AbstractSymbol, Integer> classTags = Map.of(
+    // TreeConstants.Object_, objectclasstag,
+    // TreeConstants.IO, ioclasstag,
+    // TreeConstants.Main, mainclasstag,
+    // TreeConstants.Int, intclasstag,
+    // TreeConstants.Bool, boolclasstag,
+    // TreeConstants.Str, stringclasstag);
+    private Map<AbstractSymbol, Integer> classTags = new HashMap<>();
+
+    /** Constructs a new class table and invokes the code generator */
+    public CgenClassTable(Classes cls, PrintStream str) {
+        nds = new Vector();
+
+        this.str = str;
+
+        enterScope();
+        if (Flags.cgen_debug)
+            System.out.println("Building CgenClassTable");
+
+        installBasicClasses();
+        installClasses(cls);
+        buildInheritanceTree();
+        assignClassTags();
+
+        code();
+
+        exitScope();
+    }
+
+    private void assignClassTags() {
+        int tag = 0;
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            classTags.put(nd.name, tag++);
+        }
+    }
+
+    /**
+     * This method is the meat of the code generator. It is to be
+     * filled in programming assignment 5
+     */
+    public void code() {
+        if (Flags.cgen_debug)
+            System.out.println("coding global data");
+        codeGlobalData();
+
+        if (Flags.cgen_debug)
+            System.out.println("choosing gc");
+        codeSelectGc();
+
+        if (Flags.cgen_debug)
+            System.out.println("coding constants");
+        codeConstants();
+
+        // Add your code to emit
+        // - class_nameTab
+        if (Flags.cgen_debug)
+            System.out.println("coding class name table");
+        codeClassNameTab();
+
+        // - class_objTab
+        if (Flags.cgen_debug)
+            System.out.println("coding class object table");
+        codeClassObjTab();
+
+        // - dispatch tables
+        if (Flags.cgen_debug)
+            System.out.println("coding dispatch tables");
+        codeDispatchTables();
+
+        // - prototype objects
+        if (Flags.cgen_debug)
+            System.out.println("coding prototype objects");
+        codePrototypes();
+
+        if (Flags.cgen_debug)
+            System.out.println("coding global text");
+        codeGlobalText();
+
+        // Add your code to emit
+        // - object initializer
+        if (Flags.cgen_debug)
+            System.out.println("coding object initializer");
+        codeObjectInitializer();
+
+        // - the class methods
+        if (Flags.cgen_debug)
+            System.out.println("coding class methods");
+        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
+            CgenNode nd = (CgenNode) e.nextElement();
+            if (nd.basic())
+                continue;
+            nd.codeMethods(str, this);
+        }
+
+        // - etc...
+    }
 
     // The following methods emit code for constants and global
     // declarations.
@@ -90,11 +182,11 @@ class CgenClassTable extends SymbolTable {
         // during code generation.
 
         str.println(CgenSupport.INTTAG + CgenSupport.LABEL
-                + CgenSupport.WORD + intclasstag);
+                + CgenSupport.WORD + classTags.get(TreeConstants.Int));
         str.println(CgenSupport.BOOLTAG + CgenSupport.LABEL
-                + CgenSupport.WORD + boolclasstag);
+                + CgenSupport.WORD + classTags.get(TreeConstants.Bool));
         str.println(CgenSupport.STRINGTAG + CgenSupport.LABEL
-                + CgenSupport.WORD + stringclasstag);
+                + CgenSupport.WORD + classTags.get(TreeConstants.Str));
 
     }
 
@@ -162,9 +254,9 @@ class CgenClassTable extends SymbolTable {
         AbstractTable.stringtable.addString("");
         AbstractTable.inttable.addString("0");
 
-        AbstractTable.stringtable.codeStringTable(stringclasstag, str);
-        AbstractTable.inttable.codeStringTable(intclasstag, str);
-        codeBools(boolclasstag);
+        AbstractTable.stringtable.codeStringTable(classTags.get(TreeConstants.Str), str);
+        AbstractTable.inttable.codeStringTable(classTags.get(TreeConstants.Int), str);
+        codeBools(classTags.get(TreeConstants.Bool));
     }
 
     /**
@@ -384,86 +476,6 @@ class CgenClassTable extends SymbolTable {
         parent.addChild(nd);
     }
 
-    /** Constructs a new class table and invokes the code generator */
-    public CgenClassTable(Classes cls, PrintStream str) {
-        nds = new Vector();
-
-        this.str = str;
-
-        enterScope();
-        if (Flags.cgen_debug)
-            System.out.println("Building CgenClassTable");
-
-        installBasicClasses();
-        installClasses(cls);
-        buildInheritanceTree();
-
-        code();
-
-        exitScope();
-    }
-
-    /**
-     * This method is the meat of the code generator. It is to be
-     * filled in programming assignment 5
-     */
-    public void code() {
-        if (Flags.cgen_debug)
-            System.out.println("coding global data");
-        codeGlobalData();
-
-        if (Flags.cgen_debug)
-            System.out.println("choosing gc");
-        codeSelectGc();
-
-        if (Flags.cgen_debug)
-            System.out.println("coding constants");
-        codeConstants();
-
-        // Add your code to emit
-        // - class_nameTab
-        if (Flags.cgen_debug)
-            System.out.println("coding class name table");
-        codeClassNameTab();
-
-        // - class_objTab
-        if (Flags.cgen_debug)
-            System.out.println("coding class object table");
-        codeClassObjTab();
-
-        // - dispatch tables
-        if (Flags.cgen_debug)
-            System.out.println("coding dispatch tables");
-        codeDispatchTables();
-
-        // - prototype objects
-        if (Flags.cgen_debug)
-            System.out.println("coding prototype objects");
-        codePrototypes();
-
-        if (Flags.cgen_debug)
-            System.out.println("coding global text");
-        codeGlobalText();
-
-        // Add your code to emit
-        // - object initializer
-        if (Flags.cgen_debug)
-            System.out.println("coding object initializer");
-        codeObjectInitializer();
-
-        // - the class methods
-        if (Flags.cgen_debug)
-            System.out.println("coding class methods");
-        for (Enumeration e = nds.elements(); e.hasMoreElements();) {
-            CgenNode nd = (CgenNode) e.nextElement();
-            if (nd.basic())
-                continue;
-            nd.codeMethods(str, this);
-        }
-
-        // - etc...
-    }
-
     private void codeClassObjTab() {
         str.print(CgenSupport.CLASSOBJTAB + CgenSupport.LABEL);
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
@@ -491,14 +503,14 @@ class CgenClassTable extends SymbolTable {
     }
 
     private void codePrototypes() {
-        int nextclasstag = stringclasstag + 1;
+        int nextclasstag = 0;
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            Integer classtag = classTags.get(nd.name);
-            if (classtag == null) {
-                classtag = nextclasstag++;
-            }
-            nd.codeProtObj(str, classtag);
+            // Integer classtag = classTags.get(nd.name);
+            // if (classtag == null) {
+            // classtag = nextclasstag++;
+            // }
+            nd.codeProtObj(str, nextclasstag++);
         }
     }
 
