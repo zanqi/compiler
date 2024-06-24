@@ -489,10 +489,9 @@ class CgenClassTable extends SymbolTable {
     }
 
     private void codePrototypes() {
-        int nextclasstag = 0;
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            nd.codeProtObj(str, nextclasstag++);
+            nd.codeProtObj(str, classTags.get(nd.name));
         }
     }
 

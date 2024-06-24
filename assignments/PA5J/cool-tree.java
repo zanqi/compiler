@@ -6,6 +6,8 @@
 //
 //////////////////////////////////////////////////////////
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.io.PrintStream;
 import java.util.Vector;
@@ -241,6 +243,8 @@ abstract class Case extends TreeNode {
 
     public abstract void dump_with_types(PrintStream out, int n);
 
+    public abstract int classTag(CgenClassTable cgenTable);
+
     public abstract void code(
             PrintStream s,
             CgenNode cgenNode,
@@ -282,6 +286,20 @@ class Cases extends ListNode {
 
     public TreeNode copy() {
         return new Cases(lineNumber, copyElements());
+    }
+
+    public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId, int done) {
+        Vector<Case> cs = getElements2();
+        Collections.sort(cs, new Comparator<Case>() {
+            @Override
+            public int compare(Case c1, Case c2)
+            {
+                return c2.classTag(cgenTable) - c1.classTag(cgenTable);
+            }
+        });
+        for (Case c : cs) {
+            c.code(s, cgenNode, cgenTable, tempId, done);
+        }
     }
 }
 
@@ -653,8 +671,13 @@ class branch extends Case {
         int nextCase = CgenSupport.labelIndex++;
 
         CgenNode nd = (CgenNode) cgenTable.lookup(type_decl);
+        int tag = 0;
+        for (CgenNode c : nd.getFamily()) {
+            // This assume child.classTag > parent.classTag
+            tag = Math.max(c.classTag(), tag);
+        }
         CgenSupport.emitBlti(CgenSupport.T2, nd.classTag(), nextCase, s);
-        CgenSupport.emitBgti(CgenSupport.T2, nd.classTag(), nextCase, s);
+        CgenSupport.emitBgti(CgenSupport.T2, tag, nextCase, s);
         CgenTemp t = new CgenTemp(tempId);
         cgenTable.addId(name, t);
         t.emitStore(s);
@@ -668,6 +691,12 @@ class branch extends Case {
     @Override
     public int numTemp() {
         return expr.numTemp() + 1;
+    }
+
+    @Override
+    public int classTag(CgenClassTable cgenTable) {
+        CgenNode nd = (CgenNode) cgenTable.lookup(type_decl);
+        return nd.classTag();
     }
 
 }
@@ -1142,9 +1171,7 @@ class typcase extends Expression {
         CgenSupport.emitLabelDef(nonNullBr, s);
         t.emitLoad(s, CgenSupport.T1);
         CgenSupport.emitLoad(CgenSupport.T2, 0, CgenSupport.T1, s);
-        for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
-            ((Case) e.nextElement()).code(s, cgenNode, cgenTable, tempId + 1, done);
-        }
+        cases.code(s, cgenNode, cgenTable, tempId + 1, done);
         CgenSupport.emitJal(CgenSupport.CASE_NO_MATCH_ABORT, s);
         CgenSupport.emitLabelDef(done, s);
     }

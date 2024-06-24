@@ -68,8 +68,17 @@ class CgenNode extends class_c {
      * 
      * @return the children
      */
-    Enumeration getChildren() {
-        return children.elements();
+    Vector<CgenNode> getChildren() {
+        return children;
+    }
+
+    Vector<CgenNode> getFamily() {
+        Vector<CgenNode> family = new Vector<>();
+        family.add(this);
+        for (CgenNode c : getChildren()) {
+            family.addAll(c.getFamily());
+        }
+        return family;
     }
 
     /**
