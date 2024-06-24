@@ -42,20 +42,6 @@ class CgenClassTable extends SymbolTable {
     /** This is the stream to which assembly instructions are output */
     private PrintStream str;
 
-    // Do not change, object.abort() expect these numbers
-    // private int objectclasstag = 0;
-    // private int ioclasstag = 1;
-    // private int intclasstag = 2;
-    // private int boolclasstag = 3;
-    // private int stringclasstag = 4;
-    // private int mainclasstag = 5;
-    // private Map<AbstractSymbol, Integer> classTags = Map.of(
-    // TreeConstants.Object_, objectclasstag,
-    // TreeConstants.IO, ioclasstag,
-    // TreeConstants.Main, mainclasstag,
-    // TreeConstants.Int, intclasstag,
-    // TreeConstants.Bool, boolclasstag,
-    // TreeConstants.Str, stringclasstag);
     private Map<AbstractSymbol, Integer> classTags = new HashMap<>();
 
     /** Constructs a new class table and invokes the code generator */
@@ -506,10 +492,6 @@ class CgenClassTable extends SymbolTable {
         int nextclasstag = 0;
         for (Enumeration e = nds.elements(); e.hasMoreElements();) {
             CgenNode nd = (CgenNode) e.nextElement();
-            // Integer classtag = classTags.get(nd.name);
-            // if (classtag == null) {
-            // classtag = nextclasstag++;
-            // }
             nd.codeProtObj(str, nextclasstag++);
         }
     }
