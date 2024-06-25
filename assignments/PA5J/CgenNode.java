@@ -159,12 +159,13 @@ class CgenNode extends class_c {
 
     void codeObjInit(PrintStream s, CgenClassTable cgenTable) {
         cgenTable.enterScope();
-        for (attr a : getAttrs()) {
+        Vector<attr> attrs = getAttrs();
+        for (attr a : attrs) {
             cgenTable.addId(a.name, new CgenAttr(a.name, this));
         }
-        Vector<attr> attrs = getLocalAttrs();
+        Vector<attr> localAttrs = getLocalAttrs();
         int nt = 0;
-        for (attr a : attrs) {
+        for (attr a : localAttrs) {
             nt = Math.max(nt, a.init.numTemp());
         }
 
@@ -174,13 +175,14 @@ class CgenNode extends class_c {
         if (getParentNd() != null && !getParentNd().name.equals(TreeConstants.No_class)) {
             s.println(CgenSupport.JAL + CgenSupport.objInitRef(getParentNd().name));
         }
-        int offset = 0;
-        for (attr a : attrs) {
+        int offset = attrs.size() - localAttrs.size() - 1;
+        for (attr a : localAttrs) {
+            offset++;
             if (a.init instanceof no_expr) {
                 continue;
             }
             a.init.code(s, this, cgenTable, 0);
-            CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset++, CgenSupport.SELF, s);
+            CgenSupport.emitStore(CgenSupport.ACC, CgenSupport.DEFAULT_OBJFIELDS + offset, CgenSupport.SELF, s);
         }
         CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.SELF, s);
 

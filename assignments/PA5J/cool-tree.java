@@ -1312,7 +1312,6 @@ class let extends Expression {
     public void code(PrintStream s, CgenNode cgenNode, CgenClassTable cgenTable, int tempId) {
         cgenTable.enterScope();
         CgenTemp t = new CgenTemp(tempId);
-        cgenTable.addId(identifier, t);
         if (init instanceof no_expr) {
             // look for default object to store in ACC
             if (type_decl.equals(TreeConstants.Int)) {
@@ -1335,6 +1334,8 @@ class let extends Expression {
                 init.code(s, cgenNode, cgenTable, tempId);
             }
         }
+
+        cgenTable.addId(identifier, t);
         t.emitStore(s);
 
         body.code(s, cgenNode, cgenTable, tempId + 1);
