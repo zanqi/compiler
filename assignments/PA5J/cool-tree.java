@@ -1738,13 +1738,13 @@ class lt extends Expression {
         t.emitStore(s);
 
         e2.code(s, cgenNode, cgenTable, tempId + 1);
-        CgenSupport.emitMove(
+        CgenSupport.emitLoadObjData(
                 CgenSupport.T2,
                 CgenSupport.ACC,
                 s);
 
         t.emitLoad(s);
-        CgenSupport.emitMove(
+        CgenSupport.emitLoadObjData(
                 CgenSupport.T1,
                 CgenSupport.ACC,
                 s);
@@ -1756,10 +1756,9 @@ class lt extends Expression {
         CgenSupport.emitBlt(CgenSupport.T1, CgenSupport.T2, done, s);
 
         CgenSupport.emitLoadAddress(
-                CgenSupport.A1,
+                CgenSupport.ACC,
                 BoolConst.falsebool.ref(),
                 s);
-        CgenSupport.emitJal(CgenSupport.EQUALITY_TEST, s);
         CgenSupport.emitLabelDef(done, s);
     }
 
@@ -1909,12 +1908,12 @@ class leq extends Expression {
         t.emitStore(s);
 
         e2.code(s, cgenNode, cgenTable, tempId);
-        CgenSupport.emitMove(
+        CgenSupport.emitLoadObjData(
                 CgenSupport.T2,
                 CgenSupport.ACC,
                 s);
         t.emitLoad(s);
-        CgenSupport.emitMove(
+        CgenSupport.emitLoadObjData(
                 CgenSupport.T1,
                 CgenSupport.ACC,
                 s);
@@ -1926,10 +1925,9 @@ class leq extends Expression {
         CgenSupport.emitBleq(CgenSupport.T1, CgenSupport.T2, done, s);
 
         CgenSupport.emitLoadAddress(
-                CgenSupport.A1,
+                CgenSupport.ACC,
                 BoolConst.falsebool.ref(),
                 s);
-        CgenSupport.emitJal(CgenSupport.EQUALITY_TEST, s);
         CgenSupport.emitLabelDef(done, s);
     }
 
